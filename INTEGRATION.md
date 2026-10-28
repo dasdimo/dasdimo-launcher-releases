@@ -1,7 +1,8 @@
 # Ein Spiel in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 1 (2026-10-28) · Hilfs-Skript `dasdimo_release.js` Version 1 (Anhang).
+**Version der Anleitung:** 2 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 2 (Anhang).
+**Neu in Version 2:** Screenshots für die Spielseite (`catalog.screenshots`), Eintrag mit `"type": "game"`, Spiele gibt es nur noch über den Launcher (keine direkten Links auf Spiel-Dateien), Test mit dem DasDimo Launcher (Schritt 11). Hast du schon Version 1 eingerichtet: Skript aus dem Anhang übernehmen, Screenshots ergänzen, README anpassen, dann `register`.
 **Öffentliche Adresse:** https://github.com/dasdimo/dasdimo-launcher-releases/blob/main/INTEGRATION.md
 Zum Lesen in Claude Code: `gh api repos/dasdimo/dasdimo-launcher-releases/contents/INTEGRATION.md -H "Accept: application/vnd.github.raw"`
 
@@ -13,12 +14,12 @@ Lies diese Datei ganz, bevor du anfängst. Arbeite die Schritte der Reihe nach a
 Der **DasDimo Launcher** ist ein kleines Windows-Programm für die Freunde des Benutzers. Er zeigt alle Spiele von DasDimo, installiert sie mit einem Klick, holt Updates und startet sie. Damit dein Spiel darin erscheint, braucht es:
 1. ein **öffentliches Release-Repo** `dasdimo/<spiel-id>-releases` mit fertigen Builds (der Quellcode bleibt privat),
 2. pro Version ein **GitHub-Release** mit der Spiel-exe für Windows x64 (und wenn möglich ARM64) und einer `manifest.json` mit SHA-256-Prüfsummen,
-3. **Bilder** (Icon, Cover) im Release-Repo,
+3. **Bilder** (Icon, Cover, Screenshots) im Release-Repo,
 4. einen **Eintrag in der Spieleliste** `games.json` der Zentrale `dasdimo/dasdimo-launcher-releases`.
 
 Das Hilfs-Skript im Anhang erledigt Manifest, Release, Bilder und Eintrag. Du schreibst nur eine kleine Konfiguration.
 
-**Stand des Launchers (2026-10-28):** Der DasDimo Launcher wird gerade aus dem RIFTWAKE-Launcher gebaut. Bis er fertig ist, liest noch kein Launcher die Spieleliste. Du kannst trotzdem alles fertig machen: Der heutige **RIFTWAKE-Launcher** kann dein Spiel testweise über dein Manifest installieren (Schritt 11). Sobald der DasDimo Launcher erscheint, ist dein Spiel automatisch dabei.
+**Spiele gibt es nur über den Launcher.** Freunde installieren einmal den DasDimo Launcher (Installer `DasDimoLauncher-Setup.exe` aus https://github.com/dasdimo/dasdimo-launcher-releases) und bekommen darüber alle Spiele. README und Release-Notizen deines Spiels verlinken deshalb den Launcher, nie die Spiel-Dateien direkt. Der Launcher liest die Spieleliste bei jedem Start neu: Sobald dein Eintrag drin ist, erscheint dein Spiel bei allen – ohne Launcher-Update.
 
 ## Regeln (gelten immer)
 1. **Sprache:** Mit dem Benutzer Deutsch, einfache Worte. Er kann nicht programmieren. Entscheidungen als Auswahl-Fragen mit 2–4 Vorschlägen, die empfohlene zuerst mit „(Empfohlen)“.
@@ -52,7 +53,7 @@ Lies die Projektregeln deines Spiels (z. B. `CLAUDE.md`). Zeig dem Benutzer kurz
 
 ## Schritt 2 – Spiel vorbereiten
 Dein Build muss diese Punkte erfüllen. Prüfe jeden und repariere, was fehlt:
-- **Startet ohne Installer und ohne Admin-Rechte** per Doppelklick aus jedem Ordner, z. B. `%LOCALAPPDATA%\DasDimo\Games\<game_id>\versions\1.2.0\`. Pfade mit Leerzeichen und Umlauten müssen gehen.
+- **Startet ohne Installer und ohne Admin-Rechte** per Doppelklick aus jedem Ordner, z. B. `%LOCALAPPDATA%\DasDimo-Launcher\Games\<game_id>\versions\1.2.0\`. Pfade mit Leerzeichen und Umlauten müssen gehen.
 - **Schreibt nichts neben die exe.** Der Versionsordner wird bei Updates gelöscht. Einstellungen, Spielstände und Logs gehören nach `%APPDATA%`, `%LOCALAPPDATA%` oder `%USERPROFILE%\AppData\LocalLow` (Godot `user://` = `%APPDATA%\Godot\app_userdata\<Projektname>` – das passt). Notiere diese Ordner für Schritt 5 (`user_data_dirs`).
 - **Verlässt sich nicht auf das Arbeitsverzeichnis** und braucht **keine Start-Argumente** (der Launcher startet die exe ohne Argumente).
 - **Kein eigenes Update-System** im Spiel, keine Zusatz-Installer (z. B. VC++-Pakete) nötig.
@@ -100,7 +101,8 @@ Lege diese Datei in deinem Projekt an (Beispiel, anpassen):
 		"user_data_dirs": ["%APPDATA%\\Godot\\app_userdata\\Beispielspiel"],
 		"icon": "tools/dasdimo/art/icon.png",
 		"cover": "tools/dasdimo/art/cover.jpg",
-		"logo": ""
+		"logo": "",
+		"screenshots": ["tools/dasdimo/art/shot1.jpg", "tools/dasdimo/art/shot2.jpg", "tools/dasdimo/art/shot3.jpg"]
 	}
 }
 ```
@@ -112,6 +114,7 @@ Lege diese Datei in deinem Projekt an (Beispiel, anpassen):
 | `news_file`, `readme_file` | Standardwerte wie oben; `out_dir` (Standard `builds/dasdimo-release`) für Manifest + Notizen |
 | `catalog.user_data_dirs` | Ordner aus Schritt 2, nur unter `%APPDATA%\`, `%LOCALAPPDATA%\`, `%USERPROFILE%\AppData\LocalLow\`. Werden nur gelöscht, wenn ein Spieler beim Deinstallieren „Auch Einstellungen löschen“ anhakt. Leer lassen (`[]`), wenn unklar |
 | `catalog.status` | aus Schritt 1 |
+| `catalog.screenshots` | 0–8 Bilder für die Spielseite, in dieser Reihenfolge (Schritt 6). Leer lassen (`[]`) geht, sieht aber leer aus |
 
 ## Schritt 6 – Bilder für den Launcher
 Lege sie unter `tools/dasdimo/art/` ab (sie gehören ins Git deines Spiels):
@@ -121,6 +124,7 @@ Lege sie unter `tools/dasdimo/art/` ab (sie gehören ins Git deines Spiels):
 | `icon.png` | PNG | **genau 256×256** | 300 KB | Spieleliste links (wird bis 32 px verkleinert): ein klares Motiv, kein kleiner Text, Hintergrund darf transparent sein |
 | `cover.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | 800 KB | großes Bild der Spielseite. **Kein Text im Bild** (Name/Logo zeichnet der Launcher). Unten links liegen Titel und Knopf, rechts die Neuigkeiten – das Hauptmotiv in die Mitte/oben |
 | `logo.png` (optional) | PNG, transparent | höchstens 1200×400 | 300 KB | Schriftzug statt Textnamen |
+| `shot1.jpg` … `shot8.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | je 800 KB | Screenshot-Reihe der Spielseite (klein, ein Klick öffnet die Großansicht mit Pfeilen). 3–5 starke Momente aus echtem Spielen, verschiedene Orte/Situationen, kein Text, keine Menüs |
 
 Herkunft: echte Szenen aus dem Spiel (Screenshot-Funktion der Engine in voller Auflösung, gute Kamera) und das vorhandene Spiel-Icon. Keine Klötzchen-Platzhalter. **Zeig die Bilder dem Benutzer** (Datei schicken) und warte auf sein OK. Externe Bilder nur mit passender Lizenz und Eintrag in den Credits deines Spiels.
 
@@ -158,7 +162,7 @@ Das Skript schreibt pro Release diese Datei. Der Launcher prüft sie streng; ein
 | `format` | `1` = einzelne exe-Dateien. `2` = mindestens eine `.zip` (dann pro Zip-Datei `"exe": "<Startdatei im Zip>"`). Der Launcher lehnt höhere Formate ab, als er kennt |
 | `version` | `MAJOR.MINOR.PATCH`, optional `-zusatz` aus `0-9 A-Z a-z .` (z. B. `0.2.1-test1`); ohne führendes `v`. Eine Version mit Zusatz ist **älter** als ohne: `0.2.1-test1` < `0.2.1` < `0.2.2` |
 | `tag` | `v` + Version (Git-Tag des Releases) |
-| `files[].kind` | immer `game` (`launcher` nur im RIFTWAKE-Repo/der Zentrale) |
+| `files[].kind` | immer `game` (`launcher` und `setup` gibt es nur in der Zentrale, `launcher` außerdem im RIFTWAKE-Repo für den Wechsel vom alten RIFTWAKE-Launcher) |
 | `files[].arch` | `x86_64` oder `arm64`. Fehlt `arm64`, nimmt ein Snapdragon-PC die x64-Datei (läuft emuliert) |
 | `files[].name` | Dateiname ohne Pfad: beginnt mit Buchstabe/Ziffer, dann nur `A–Z a–z 0–9 . _ -`, endet auf `.exe` (Format 1) oder `.zip` (Format 2) |
 | `files[].size`, `sha256` | Bytes und SHA-256 (64 Hex-Zeichen) – der Launcher prüft beides nach dem Download |
@@ -179,7 +183,7 @@ Das Skript schreibt pro Release diese Datei. Der Launcher prüft sie streng; ein
 ```
 Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im Spiel merkt). Hat dein Projekt schon ein Änderungsprotokoll, übernimm daraus – oder lass dir vom Benutzer sagen, was drinstehen soll.
 
-**`tools/dasdimo/README.md`** – Startseite des Release-Repos, Deutsch oben, Englisch darunter: was das Spiel ist (2 Sätze), wie man es bekommt („im DasDimo Launcher“ + direkter Link `https://github.com/dasdimo/<game_id>-releases/releases/latest/download/<Datei>` für x64 und ARM64), SmartScreen-Hinweis („Weitere Informationen“ → „Trotzdem ausführen“, die Datei ist nicht signiert), wo Einstellungen liegen, an wen man Fehler schickt. Der Quellcode ist nicht öffentlich – das kurz erwähnen.
+**`tools/dasdimo/README.md`** – Startseite des Release-Repos, Deutsch oben, Englisch darunter: was das Spiel ist (2 Sätze), wie man es bekommt (**nur** über den DasDimo Launcher: Link https://github.com/dasdimo/dasdimo-launcher-releases, dort den Installer `DasDimoLauncher-Setup.exe` laden – keine direkten Links auf Spiel-Dateien), SmartScreen-Hinweis für den Installer („Weitere Informationen“ → „Trotzdem ausführen“, die Datei ist nicht signiert), wo Einstellungen liegen, an wen man Fehler schickt. Der Quellcode ist nicht öffentlich – das kurz erwähnen.
 
 ## Schritt 9 – Hilfs-Skript anlegen und prüfen
 1. Kopiere das Skript aus dem **Anhang** unverändert nach `tools/dasdimo/dasdimo_release.js`.
@@ -204,29 +208,36 @@ node tools/dasdimo/dasdimo_release.js release --readme
 Das Skript prüft das Konto, lädt die README (noreply), erstellt das Release `v<version>` mit allen Builds und **zuletzt** `manifest.json`, markiert es als „latest“ und vergleicht danach jede Datei per SHA-256 mit GitHub. Am Ende steht `RELEASE OK` mit Link. Bei einem schon vorhandenen Release mit gleicher Version lädt es nur geänderte Dateien neu.
 
 ## Schritt 11 – Mit dem Launcher testen
-**Heute (bis der DasDimo Launcher da ist) mit dem RIFTWAKE-Launcher:** Er liegt auf dem PC des Benutzers meist unter `%USERPROFILE%\Documents\Claude Code\Mein Shooter\builds\RiftwakeLauncher.exe`. Fehlt er, frag, ob du ihn laden darfst: `RiftwakeLauncher.exe` von https://github.com/dasdimo/riftwake-releases/releases/latest (ca. 105 MB).
+Du testest mit dem **DasDimo Launcher** und einer lokalen Spieleliste, die nur dein Spiel enthält – so siehst du die Spielseite genau wie später, bevor etwas in der Zentrale steht.
 
-1. Automatischer Test (installiert in einen Testordner und beendet sich):
+**Launcher finden:** Hat der Benutzer ihn installiert, liegt er unter `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\DasDimoLauncher.exe`. Fehlt er, bitte den Benutzer, ihn über den Installer von https://github.com/dasdimo/dasdimo-launcher-releases zu installieren (ein Klick, keine Admin-Rechte).
+
+1. Lokale Spieleliste schreiben (lädt nichts hoch):
    ```powershell
-   $launcher = "$env:USERPROFILE\Documents\Claude Code\Mein Shooter\builds\RiftwakeLauncher.exe"
-   $test = "$env:TEMP\dasdimo-launcher-test\<game_id>"
-   & $launcher -- "--manifest-url=https://github.com/dasdimo/<game_id>-releases/releases/latest/download/manifest.json" "--install-dir=$test" --auto-update --quit-when-done | Out-Null
-   Get-Content "$test\launcher.log"; Get-Content "$test\installed.json"
+   node tools/dasdimo/dasdimo_release.js register --dry-run
    ```
-   Erwartet: im Log `latest <version>, file <Datei> (x86_64)` und `installed <version>`; in `installed.json` `"current": "<version>"`. Mit `--arch=arm64` prüfst du die ARM64-Auswahl.
-2. Test mit dem Benutzer: denselben Befehl **ohne** `--auto-update --quit-when-done` starten. Der Launcher sieht aus wie RIFTWAKE, installiert aber dein Spiel. Bitte den Benutzer, auf **SPIELEN** zu klicken, und frag, ob das Spiel startet.
-   **Achtung:** Im RIFTWAKE-Launcher nicht „Deinstallieren“ mit „Auch meine Einstellungen löschen“ benutzen – das würde die RIFTWAKE-Einstellungen löschen, nicht deine.
-3. Danach den Testordner löschen (`$env:TEMP\dasdimo-launcher-test\<game_id>`).
-4. Meldet der Launcher „Manifest ungültig“ oder „Download fehlgeschlagen“: der Grund steht in `launcher.log` im Testordner (z. B. `files[0].name invalid`).
+   Am Ende steht der Pfad von `builds/dasdimo-release/games.local.json` (dein Eintrag mit den Bildern von deiner Festplatte und dem echten Manifest aus Schritt 10).
+2. Automatischer Test (installiert in einen Testordner und beendet sich):
+   ```powershell
+   $launcher = "$env:LOCALAPPDATA\DasDimo-Launcher\Launcher\DasDimoLauncher.exe"
+   $test = "$env:TEMP\dasdimo-launcher-test\<game_id>"
+   $list = (Resolve-Path "builds\dasdimo-release\games.local.json").Path
+   & $launcher -- "--catalog-url=$list" "--root-dir=$test" --portable --game=<game_id> --auto-update --quit-when-done | Out-Null
+   Get-Content "$test\Launcher\launcher.log"; Get-Content "$test\Games\<game_id>\installed.json"
+   ```
+   Erwartet: im Log `games.json: 1 game(s)` und `installed <version>`; in `installed.json` `"current": "<version>"`. Mit `--arch=arm64` prüfst du die ARM64-Auswahl. `--root-dir` hält alles im Testordner (die echte Installation des Benutzers bleibt unberührt), `--portable` verhindert die Frage „Launcher installieren?“.
+3. Test mit dem Benutzer: denselben Befehl **ohne** `--auto-update --quit-when-done` starten. Der Launcher zeigt nur dein Spiel – mit Icon, Cover, Screenshots und Neuigkeiten. Bitte den Benutzer, sich die Seite anzusehen, auf **Spielen** zu klicken, und frag, ob alles passt und das Spiel startet.
+4. Danach den Testordner löschen (`$env:TEMP\dasdimo-launcher-test\<game_id>`).
+5. Meldet der Launcher einen Fehler: der Grund steht in `$test\Launcher\launcher.log` (z. B. `files[0].name invalid` oder `HTTP 404`, wenn das Release fehlt).
 
-**Später (DasDimo Launcher):** Nach Schritt 12 erscheint das Spiel von selbst. Mit `status: hidden` ist es nur sichtbar, wenn der Launcher mit `-- --show-hidden` gestartet wird.
+Mit `status: hidden` ist das Spiel nach Schritt 12 nur sichtbar, wenn der Launcher mit `-- --show-hidden` gestartet wird.
 
 ## Schritt 12 – In die Spieleliste eintragen (erst nach Ja des Benutzers)
 ```powershell
 node tools/dasdimo/dasdimo_release.js register --dry-run
 node tools/dasdimo/dasdimo_release.js register
 ```
-Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`logo.png` nach `dasdimo/<game_id>-releases` → Ordner `launcher/` (nur wenn geändert) und trägt dein Spiel in `games.json` der Zentrale ein bzw. aktualisiert den Eintrag (Reihenfolge und Datum der Aufnahme bleiben). Voraussetzung: mindestens ein Release (Schritt 10). Meldet GitHub einen Konflikt (jemand hat gleichzeitig eingetragen), einfach noch einmal ausführen.
+Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`logo.png` und die Screenshots (`shot1.jpg` …) nach `dasdimo/<game_id>-releases` → Ordner `launcher/` (nur wenn geändert) und trägt dein Spiel in `games.json` der Zentrale ein bzw. aktualisiert den Eintrag (Reihenfolge und Datum der Aufnahme bleiben). Voraussetzung: mindestens ein Release (Schritt 10). Meldet GitHub einen Konflikt (jemand hat gleichzeitig eingetragen), einfach noch einmal ausführen.
 
 ## Schritt 13 – Festhalten und Bericht
 1. Im eigenen Projekt dokumentieren (z. B. `CLAUDE.md`/Übergabe-Datei): Release-Repo, `tools/dasdimo/`, Ablauf „Neue Version veröffentlichen“:
@@ -234,9 +245,9 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
    2. Builds x64 + ARM64 bauen, Tests deines Spiels grün.
    3. `node tools/dasdimo/dasdimo_release.js check`, dann `release` (nur wenn der Benutzer veröffentlichen will).
    4. Test-Release zum Ausprobieren: `release --suffix test1` → Version `<version>-test1` wird „latest“. Danach mit OK des Benutzers löschen: `gh release delete v<version>-test1 -R dasdimo/<game_id>-releases --cleanup-tag --yes` – dann ist wieder das vorige Release aktuell.
-   5. Neue Bilder, neuer Untertitel oder anderer Status: `tools/dasdimo/dasdimo.json` ändern, dann `register`.
+   5. Neue Bilder oder Screenshots, neuer Untertitel oder anderer Status: `tools/dasdimo/dasdimo.json` ändern, dann `register`.
 2. Committe `tools/dasdimo/` (Skript, Konfiguration, Neuigkeiten, README, Bilder) im Repo deines Spiels, mit verständlicher deutscher Commit-Nachricht.
-3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Ergebnis des Launcher-Tests, was noch offen ist (z. B. Zip-Spiel wartet auf L4), und eine kurze Nachricht für die Freunde mit dem Direkt-Link.
+3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Ergebnis des Launcher-Tests, was noch offen ist (z. B. Zip-Spiel wartet auf L4), und eine kurze Nachricht für die Freunde („Neues Spiel im DasDimo Launcher: einfach den Launcher öffnen“).
 
 ## Fehlerhilfe
 | Meldung | Lösung |
@@ -245,7 +256,7 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 | `… does not exist yet` | Schritt 3 |
 | `build missing: …` | Build fehlt oder Dateiname passt nicht zu `files[].path` |
 | `news: no entry for <version>` | `news.json` für die neue Version ergänzen |
-| `catalog.cover … must be 1920x1080` | Bild in genau dieser Größe neu speichern |
+| `catalog.cover … must be 1920x1080` | Bild in genau dieser Größe neu speichern (gilt auch für `catalog.screenshots[…]`) |
 | `… has no release yet` | erst Schritt 10, dann `register` |
 | Launcher: „Manifest ungültig“ | `launcher.log` lesen; meist Dateiname mit Leerzeichen/Umlaut oder Version mit `v` |
 
@@ -255,12 +266,13 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game (helper version 1, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game (helper version 2, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js manifest [--suffix test1]  only write manifest.json + notes.md
 //   node tools/dasdimo/dasdimo_release.js release [--suffix test1] [--readme]   publish a GitHub release
 //   node tools/dasdimo/dasdimo_release.js register [--dry-run]       pictures + entry in the launcher's games.json
+//     (--dry-run also writes <out_dir>/games.local.json: the entry with local pictures, for a test in the launcher)
 // Public commits (README, pictures, games.json) use the GitHub noreply address, never the local git e-mail.
 "use strict";
 const fs = require("fs");
@@ -269,7 +281,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 1;
+const HELPER_VERSION = 2;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -286,6 +298,10 @@ const PICTURES = {
 	cover: { type: "jpg", width: 1920, height: 1080, maxKb: 800, required: true },
 	logo: { type: "png", maxWidth: 1200, maxHeight: 400, maxKb: 300, required: false },
 };
+// Pictures of the demo page (catalog.screenshots), shown in this order.
+const SCREENSHOT = { type: "jpg", width: 1920, height: 1080, maxKb: 800 };
+const MAX_SCREENSHOTS = 8;
+const LAUNCHER_PAGE = `https://github.com/${HUB_REPO}`;
 
 const ROOT = path.resolve(__dirname, "..", "..");
 
@@ -394,6 +410,15 @@ function catalogProblems(cfg) {
 		}
 		const problem = pictureProblem(rel(file), rule);
 		if (problem) problems.push(`catalog.${key} (${file}): ${problem}`);
+	}
+	const shots = c.screenshots === undefined ? [] : c.screenshots;
+	if (!Array.isArray(shots) || shots.length > MAX_SCREENSHOTS || shots.some((file) => typeof file !== "string" || !file)) {
+		problems.push(`catalog.screenshots: list of up to ${MAX_SCREENSHOTS} JPEG files (may be empty)`);
+	} else {
+		for (const [i, file] of shots.entries()) {
+			const problem = pictureProblem(rel(file), SCREENSHOT);
+			if (problem) problems.push(`catalog.screenshots[${i}] (${file}): ${problem}`);
+		}
 	}
 	return problems;
 }
@@ -541,10 +566,8 @@ function buildRelease(cfg, suffix) {
 	return { version, tag, manifest, manifestPath, notesPath, assets: files.map((file) => file.path) };
 }
 
+// Games come only through the launcher: the notes link the launcher, not the game files.
 function releaseNotes(cfg, manifest, test) {
-	const latest = `https://github.com/${cfg.repo}/releases/latest/download/`;
-	const x64 = manifest.files.find((file) => file.arch === "x86_64");
-	const arm = manifest.files.find((file) => file.arch === "arm64");
 	const base = manifest.version.split("-")[0];
 	const news = manifest.news.find((group) => group.version === manifest.version)
 		|| manifest.news.find((group) => group.version === base) || { entries: [] };
@@ -553,9 +576,9 @@ function releaseNotes(cfg, manifest, test) {
 	for (const lang of ["de", "en"]) {
 		const de = lang === "de";
 		lines.push(`## ${cfg.game_name} ${manifest.version}`, "");
-		let download = (de ? "**Herunterladen:** " : "**Download:** ") + `[${x64.name}](${latest}${x64.name}) (${de ? "Windows-PC" : "Windows PC"})`;
-		if (arm) download += ` · [${arm.name}](${latest}${arm.name}) (Snapdragon / Windows on ARM)`;
-		lines.push(download + (de ? " – bald auch im DasDimo Launcher." : " – soon in the DasDimo Launcher too."), "");
+		lines.push(de
+			? `**So bekommst du es:** im [DasDimo Launcher](${LAUNCHER_PAGE}) – dort installieren, aktualisieren und spielen.`
+			: `**How to get it:** in the [DasDimo Launcher](${LAUNCHER_PAGE}) – install, update and play there.`, "");
 		if (news.entries.length) {
 			lines.push(de ? "### Neu" : "### New", "");
 			for (const entry of news.entries) lines.push("- " + entry[lang]);
@@ -706,6 +729,7 @@ function commandRegister(cfg, args) {
 	const c = cfg.catalog;
 	const entry = {
 		id: cfg.game_id,
+		type: "game",
 		name: cfg.game_name,
 		repo: cfg.repo,
 		manifest_url: `https://github.com/${cfg.repo}/releases/latest/download/manifest.json`,
@@ -715,16 +739,28 @@ function commandRegister(cfg, args) {
 		tagline: { de: c.tagline.de.trim(), en: c.tagline.en.trim() },
 		accent: c.accent.toUpperCase(),
 	};
+	// The same entry with local pictures: a local games.json may point to local files (test in the launcher).
+	const local = { ...entry };
+	const upload = (file, remotePath, message) => {
+		const bytes = fs.readFileSync(rel(file));
+		if (args.dryRun) console.log(`would upload ${file} -> ${cfg.repo}/${remotePath}`);
+		else putFile(cfg.repo, remotePath, bytes, message, who);
+		const sha256 = crypto.createHash("sha256").update(bytes).digest("hex");
+		return { url: `https://raw.githubusercontent.com/${cfg.repo}/${branch}/${remotePath}`, local: rel(file).replace(/\\/g, "/"), sha256 };
+	};
 	for (const key of Object.keys(PICTURES)) {
 		if (!c[key]) continue;
-		const bytes = fs.readFileSync(rel(c[key]));
-		const remotePath = `launcher/${key}.${PICTURES[key].type}`;
-		if (args.dryRun) console.log(`would upload ${c[key]} -> ${cfg.repo}/${remotePath}`);
-		else putFile(cfg.repo, remotePath, bytes, "Launcher-Bild: " + key, who);
-		entry[`${key}_url`] = `https://raw.githubusercontent.com/${cfg.repo}/${branch}/${remotePath}`;
-		entry[`${key}_sha256`] = crypto.createHash("sha256").update(bytes).digest("hex");
+		const picture = upload(c[key], `launcher/${key}.${PICTURES[key].type}`, "Launcher-Bild: " + key);
+		entry[`${key}_url`] = picture.url;
+		local[`${key}_url`] = picture.local;
+		entry[`${key}_sha256`] = local[`${key}_sha256`] = picture.sha256;
 	}
-	entry.user_data_dirs = c.user_data_dirs;
+	const shots = (c.screenshots || []).map((file, i) => upload(file, `launcher/shot${i + 1}.jpg`, `Launcher-Screenshot ${i + 1}`));
+	if (shots.length) {
+		entry.screenshots = shots.map((shot) => ({ url: shot.url, sha256: shot.sha256 }));
+		local.screenshots = shots.map((shot) => ({ url: shot.local, sha256: shot.sha256 }));
+	}
+	entry.user_data_dirs = local.user_data_dirs = c.user_data_dirs;
 	const hubFile = getFile(HUB_REPO, CATALOG_FILE);
 	if (!hubFile && !args.dryRun) fail(`${HUB_REPO}/${CATALOG_FILE} not found`);
 	const catalog = hubFile ? JSON.parse(hubFile.content.toString("utf8")) : { format: 1, games: [] };
@@ -742,6 +778,11 @@ function commandRegister(cfg, args) {
 	if (args.dryRun) {
 		console.log(JSON.stringify(entry, null, "\t"));
 		console.log(`DRY RUN: would ${old ? "update" : "add"} '${entry.id}' in ${HUB_REPO}/${CATALOG_FILE} (${catalog.games.length} game(s))`);
+		Object.assign(local, { order: entry.order, added: entry.added, updated: entry.updated });
+		const localFile = path.join(rel(cfg.out_dir), "games.local.json");
+		fs.mkdirSync(path.dirname(localFile), { recursive: true });
+		fs.writeFileSync(localFile, JSON.stringify({ format: 1, updated: today(), games: [local] }, null, "\t") + "\n", "utf8");
+		console.log(`test list for the launcher: ${localFile} (INTEGRATION.md step 11)`);
 		return;
 	}
 	putFile(HUB_REPO, CATALOG_FILE, Buffer.from(text, "utf8"), `Spieleliste: ${cfg.game_name} ${old ? "aktualisiert" : "eingetragen"}`, who);
