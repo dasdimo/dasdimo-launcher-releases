@@ -193,6 +193,7 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 | `files[].url` | voller Link zur Datei im Release (`https://github.com/dasdimo/…`). Format 2: Name im Release = die ersten 12 Zeichen der SHA-256 + Dateiname, weil GitHub keine Ordner kennt und beide Plattformen eine `Beispielspiel.exe` haben |
 | `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN |
 | `launcher_version` | bei Spielen immer `""` |
+| `min_launcher` | optional: die älteste DasDimo-Launcher-Version, mit der diese Spielversion installiert und gespielt werden darf, z. B. `"1.1.0"` (wie `version`, ohne `v`). Ist der Launcher älter, sperrt er „Aktualisieren“ und „Spielen“ (auch die installierte Version) und zeigt „Launcher aktualisieren“; ohne Internet bleibt die installierte Version spielbar. Gilt ab Launcher 1.1.1, ältere ignorieren das Feld. Nur setzen, wenn das Spiel wirklich einen neueren Launcher braucht. Das Hilfs-Skript v3 schreibt es noch nicht – bei Bedarf beim Benutzer melden |
 
 ## Schritt 8 – Neuigkeiten und README
 **`tools/dasdimo/news.json`** – alle Versionen, neueste zuerst. Das Skript nimmt die letzten 3 (Versionen mit `-`, z. B. `0.3.0-dev2`, werden ausgelassen, außer es ist die gerade veröffentlichte). Mehrere Blöcke mit gleicher Version werden zusammengefasst.
