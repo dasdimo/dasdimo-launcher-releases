@@ -1,5 +1,60 @@
 {
 	"format": 1,
-	"updated": "2026-10-28",
-	"games": []
+	"updated": "2026-10-29",
+	"games": [
+		{
+			"id": "riftwake",
+			"type": "game",
+			"name": "RIFTWAKE",
+			"repo": "dasdimo/riftwake-releases",
+			"manifest_url": "https://github.com/dasdimo/riftwake-releases/releases/latest/download/manifest.json",
+			"platforms": [
+				"x86_64",
+				"arm64"
+			],
+			"engine": "Godot 4.7",
+			"status": "testing",
+			"tagline": {
+				"de": "Taktischer 5v5-Shooter in Städten voller leuchtender Risse.",
+				"en": "Tactical 5v5 shooter in cities torn open by glowing rifts."
+			},
+			"accent": "#9D6BFF",
+			"icon_url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/icon.png",
+			"icon_sha256": "d212af92951e6a837223fc4e5fe5c8d3e0e70d240d08205cd47b9178a3bf5913",
+			"cover_url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/cover.jpg",
+			"cover_sha256": "72db970b1ebaa5cbb08d3a741e5cbd9523af0f488e9934dffbec6987d2d039cd",
+			"screenshots": [
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot1.jpg",
+					"sha256": "2be1ac6645879778c2f32bef33f61c4528c73b67299b992e538bc9c936fe723f"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot2.jpg",
+					"sha256": "dfd4513b6ade3a7d47afae6b0278e3c32a3f1dcb5508f80714f2da16e417e74e"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot3.jpg",
+					"sha256": "a71e7833cb5f731bd85afeb5407deddfa774cb8f51a9c5d67b151b8486991cec"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot4.jpg",
+					"sha256": "e99e8ef054255eda95fd2353d9b10c01f8535dd1116ee74592050d07c8817805"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot5.jpg",
+					"sha256": "6e06565b68a68df0d6bea991a91438655a284d75accedea31864df057518fc0c"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot6.jpg",
+					"sha256": "c3ac7d722375e8f2048b1a7ba39c6fc39fae897ec3e6577482cae4e2e0a3068c"
+				}
+			],
+			"user_data_dirs": [
+				"%APPDATA%\\Godot\\app_userdata\\Riftwake"
+			],
+			"order": 10,
+			"added": "2026-10-29",
+			"updated": "2026-10-29"
+		}
+	]
 }
