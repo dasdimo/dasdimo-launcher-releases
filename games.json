@@ -47,6 +47,14 @@
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot6.jpg",
 					"sha256": "5573a32305d4557b9d2d052d7447a0e8dae2b5f2975ec2a5e9c2b87c3a9fe685"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot7.jpg",
+					"sha256": "95f91140f8c007922b93c6ab9d3e84478efac801c2b2058c468e08dede4ba498"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot8.jpg",
+					"sha256": "fdfcf9d0425b4d07395a88bd1a62af92819154e9d36302ed454bd8bcd9f47b4b"
 				}
 			],
 			"user_data_dirs": [
