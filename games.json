@@ -22,31 +22,31 @@
 			"icon_url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/icon.png",
 			"icon_sha256": "d212af92951e6a837223fc4e5fe5c8d3e0e70d240d08205cd47b9178a3bf5913",
 			"cover_url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/cover.jpg",
-			"cover_sha256": "72db970b1ebaa5cbb08d3a741e5cbd9523af0f488e9934dffbec6987d2d039cd",
+			"cover_sha256": "9e7dee26b529112fcf9218ec735e95314e3f7ae5b07cce922dbd6334fc41cd4c",
 			"screenshots": [
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot1.jpg",
-					"sha256": "2be1ac6645879778c2f32bef33f61c4528c73b67299b992e538bc9c936fe723f"
+					"sha256": "279e007f365a2a4f4e08b36ac7ab795bba4ac7ba0a75f8b8c9b4108e7631e197"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot2.jpg",
-					"sha256": "dfd4513b6ade3a7d47afae6b0278e3c32a3f1dcb5508f80714f2da16e417e74e"
+					"sha256": "adb6fca3d729a79d286efc9ca87e0efc0edf0c02c7445cb400063dc8b9cb39c4"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot3.jpg",
-					"sha256": "a71e7833cb5f731bd85afeb5407deddfa774cb8f51a9c5d67b151b8486991cec"
+					"sha256": "b71cda66168cc0e8caf5235fb1c5c37640848d761d9cfbef90534b6b8ce9b0c2"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot4.jpg",
-					"sha256": "e99e8ef054255eda95fd2353d9b10c01f8535dd1116ee74592050d07c8817805"
+					"sha256": "ac626e24ccb9a694241f8af8b69328118816af41ca098da32cb7ac906d83c8c2"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot5.jpg",
-					"sha256": "6e06565b68a68df0d6bea991a91438655a284d75accedea31864df057518fc0c"
+					"sha256": "9195e7ba2038851d6f976f3f70806e0aecbec8c2100674e714c7ed2c58393f52"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot6.jpg",
-					"sha256": "c3ac7d722375e8f2048b1a7ba39c6fc39fae897ec3e6577482cae4e2e0a3068c"
+					"sha256": "5573a32305d4557b9d2d052d7447a0e8dae2b5f2975ec2a5e9c2b87c3a9fe685"
 				}
 			],
 			"user_data_dirs": [
