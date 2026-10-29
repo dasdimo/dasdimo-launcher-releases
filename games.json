@@ -7,7 +7,7 @@
 			"type": "game",
 			"name": "RIFTWAKE",
 			"repo": "dasdimo/riftwake-releases",
-			"manifest_url": "https://github.com/dasdimo/riftwake-releases/releases/latest/download/manifest.json",
+			"manifest_url": "https://github.com/dasdimo/riftwake-releases/releases/latest/download/riftwake.json",
 			"platforms": [
 				"x86_64",
 				"arm64"
