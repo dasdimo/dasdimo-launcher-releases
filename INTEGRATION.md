@@ -1,7 +1,8 @@
 # Ein Spiel in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 3 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 3 (Anhang).
+**Version der Anleitung:** 4 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 4 (Anhang).
+**Neu in Version 4:** **Discord-Beitrag pro Version:** Nach `release` legt das Skript im Discord-Patch-Forum deines Spiels von selbst einen neuen Beitrag mit den deutschen Neuigkeiten und Bildern an – sobald der Benutzer für dein Spiel einen Webhook eingerichtet hat. Neuer Befehl `discord` (Abschnitt „Discord-Beitrag“ in Schritt 10). Schon eingerichtet? Skript aus dem Anhang übernehmen, sonst ändert sich nichts.
 **Neu in Version 3:** Spiele aus **mehreren Dateien** (Build-Ordner, Manifest-Format 2): Bei einem Update lädt der Launcher nur die geänderten Dateien statt des ganzen Spiels (DasDimo Launcher ab 1.1.0). Neuer Befehl `diff` (zeigt vor dem Release, wie viel die Spieler laden), Feld `manifest_name`, die `.zip`-Variante entfällt. Schon eingerichtet? Skript aus dem Anhang übernehmen – mit `path` (eine exe) läuft alles weiter wie bisher; zum Umstieg siehe „Spiel aus mehreren Dateien“ (nur nach Rücksprache mit dem Benutzer).
 **Neu in Version 2:** Screenshots (`catalog.screenshots`), Eintrag mit `"type": "game"`, Spiele nur über den Launcher, Test mit dem Launcher (Schritt 11).
 **Öffentliche Adresse:** https://github.com/dasdimo/dasdimo-launcher-releases/blob/main/INTEGRATION.md
@@ -24,7 +25,7 @@ Das Hilfs-Skript im Anhang erledigt Manifest, Release, Bilder und Eintrag. Du sc
 
 ## Regeln (gelten immer)
 1. **Sprache:** Mit dem Benutzer Deutsch, einfache Worte. Er kann nicht programmieren. Entscheidungen als Auswahl-Fragen mit 2–4 Vorschlägen, die empfohlene zuerst mit „(Empfohlen)“.
-2. **Erst fragen, dann veröffentlichen:** Repo anlegen, Release hochladen, Bilder hochladen, Spieleliste ändern – jedes Mal vorher sagen, was öffentlich wird, und auf ein klares Ja warten.
+2. **Erst fragen, dann veröffentlichen:** Repo anlegen, Release hochladen (samt Discord-Beitrag), Bilder hochladen, Spieleliste ändern – jedes Mal vorher sagen, was öffentlich wird, und auf ein klares Ja warten.
 3. **Keine private E-Mail in öffentlichen Repos:** In Release-Repos und in der Zentrale **nie** `git commit`/`git push` und kein `gh repo create --add-readme`. Dateien kommen nur über das Hilfs-Skript (GitHub-API mit der noreply-Adresse `<id>+dasdimo@users.noreply.github.com`). Releases selbst erzeugen keine Commits.
 4. **Releases nur per Skript:** immer `dasdimo_release.js release`, nie per Hand im Browser oder mit einzelnen `gh release`-Befehlen (Ausnahme: Test-Release löschen, Schritt 13).
 5. **Downloads nur mit Erlaubnis:** Dateiname, Quelle und Größe nennen und fragen.
@@ -208,6 +209,8 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 ```
 Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im Spiel merkt). Hat dein Projekt schon ein Änderungsprotokoll, übernimm daraus – oder lass dir vom Benutzer sagen, was drinstehen soll.
 
+Optional pro Version: **Bilder für den Discord-Beitrag**, z. B. `"images": ["tools/dasdimo/news_images/0.2.0-wirtin.jpg"]` (Pfade im Repo deines Spiels, `.jpg`/`.png`/`.webp`/`.gif`, höchstens 4 pro Version, zusammen höchstens 8 MB). Sie gehen nur nach Discord, nicht ins Manifest und nicht in den Launcher. Ohne `images` zeigt der Beitrag das Cover und die ersten 3 Screenshots aus `catalog`. Auf den Bildern dürfen keine persönlichen Daten stehen (z. B. Ordner mit dem Windows-Namen des Benutzers).
+
 **`tools/dasdimo/README.md`** – Startseite des Release-Repos, Deutsch oben, Englisch darunter: was das Spiel ist (2 Sätze), wie man es bekommt (**nur** über den DasDimo Launcher: Link https://github.com/dasdimo/dasdimo-launcher-releases, dort den Installer `DasDimoLauncher-Setup.exe` laden – keine direkten Links auf Spiel-Dateien), SmartScreen-Hinweis für den Installer („Weitere Informationen“ → „Trotzdem ausführen“, die Datei ist nicht signiert), wo Einstellungen liegen, an wen man Fehler schickt. Der Quellcode ist nicht öffentlich – das kurz erwähnen.
 
 ## Schritt 9 – Hilfs-Skript anlegen und prüfen
@@ -238,6 +241,17 @@ node tools/dasdimo/dasdimo_release.js release --readme
 Das Skript prüft das Konto und lädt die README (noreply). Dann erstellt es das Release `v<version>`, zuerst nicht als „latest“ – so lange liest der Launcher noch das vorige Release. Es lädt alle Spieldateien und **zuletzt** das Manifest hoch, markiert das Release als „latest“ und vergleicht jede Datei per SHA-256 mit GitHub. Am Ende steht `RELEASE OK` mit Link.
 - Jedes Release enthält alle Dateien des Spiels; die Spieler laden trotzdem nur geänderte. Alte Releases darfst du darum später löschen.
 - Gibt es das Release mit dieser Version schon, lädt das Skript nur geänderte Dateien neu und entfernt Dateien, die das neue Manifest nicht mehr nennt.
+
+### Discord-Beitrag
+Nach `RELEASE OK` legt das Skript im Discord-Patch-Forum deines Spiels einen **neuen Beitrag** an: Titel `<game_name> <version>`, darin die deutschen Neuigkeiten dieser Version aus `news.json` als Liste, dann „Aktualisiere im DasDimo Launcher“ mit dem Link zur Download-Seite. Niemand wird erwähnt (kein @everyone). Lange Neuigkeiten gehen in weiteren Nachrichten im selben Beitrag weiter. Test-Releases (`--suffix`) bekommen keinen Beitrag.
+- **Die Webhook-Adresse ist geheim.** Sie liegt nur auf dem PC des Benutzers in `%APPDATA%\DasDimo\discord.json` (Schlüssel = deine `game_id`). Lies, zeig oder kopier diese Datei nie, frag den Benutzer nie im Chat nach der Adresse und schreib sie in kein Repo und keine andere Datei.
+- **Einrichten macht der Benutzer selbst:** in Discord ein Forum für die Patches deines Spiels anlegen → Zahnrad (Kanal bearbeiten) → Integrationen → Webhooks → Neuer Webhook → „Webhook-URL kopieren“. Dann im Projekt des DasDimo Launchers `tools\discord\webhooks_einrichten.cmd` doppelklicken (liegt bei ihm unter `Dokumente\Claude Code\DasDimo Launcher`), bei „weiteres Spiel“ deine `game_id` eingeben und die Adresse einfügen. Das Fenster prüft die Adresse und speichert sie nur auf dem PC. RIFTWAKE ist dort schon vorgesehen.
+- Ohne Webhook für deine `game_id` steht nach dem Release nur ein Hinweis (`note: no Discord webhook …`), kein Fehler.
+- Vorher ansehen (postet nichts): `node tools/dasdimo/dasdimo_release.js discord --dry-run`. Zeig dem Benutzer den Text, wenn du ihn nach dem Ja zum Release fragst – das Ja gilt dann für Release und Beitrag. Will er keinen Beitrag: `release --no-discord`.
+- Einzeln posten – wenn es nach dem Release nicht klappte (`DISCORD NOT POSTED: …`) oder wenn dein Spiel ein eigenes Release-Skript hat (dann direkt nach dessen Release aufrufen): `node tools/dasdimo/dasdimo_release.js discord`. Die Version kommt aus `version`/`version_file`, mit `--version 0.4.0` eine bestimmte. Eine Version, die schon gepostet wurde, wird übersprungen (gemerkt in `%APPDATA%\DasDimo\discord_posts.json`); `--again` postet sie noch einmal – nur nach Ja des Benutzers.
+- **Bilder:** Unter der Liste zeigt der Beitrag die Bilder der Version (`images` in `news.json`, Schritt 8) als Galerie, sonst das Cover und die ersten 3 Screenshots. Der Probelauf nennt jedes Bild (`picture 1-cover.jpg (386 KB): …`). Fehlt ein Bild oder ist es zu groß, wird es weggelassen (`note: picture …`), der Beitrag kommt trotzdem; `check` meldet es vorher als `PROBLEM discord: …`.
+- Stehen deine Neuigkeiten nicht in `news.json` (eigenes Release-Skript), gib die Datei mit: `discord --news <datei>`. Das kann eine Liste wie `news.json` sein oder dein gerade gebautes Spiel-Manifest (dessen `news`).
+- Am Ende steht `DISCORD OK: <Link zum Beitrag>`. Den Link nennst du im Bericht.
 
 ## Schritt 11 – Mit dem Launcher testen
 Du testest mit dem **DasDimo Launcher** und einer lokalen Spieleliste, die nur dein Spiel enthält – so siehst du die Spielseite genau wie später, bevor etwas in der Zentrale steht.
@@ -275,11 +289,11 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 1. Im eigenen Projekt dokumentieren (z. B. `CLAUDE.md`/Übergabe-Datei): Release-Repo, `tools/dasdimo/`, Ablauf „Neue Version veröffentlichen“:
    1. Version im Projekt erhöhen, `news.json` ergänzen (DE+EN).
    2. Builds x64 + ARM64 bauen, Tests deines Spiels grün.
-   3. `node tools/dasdimo/dasdimo_release.js check`, dann `diff` (dem Benutzer die MB nennen), dann `release` (nur wenn der Benutzer veröffentlichen will).
+   3. `node tools/dasdimo/dasdimo_release.js check`, dann `diff` (dem Benutzer die MB nennen) und `discord --dry-run` (den Discord-Text zeigen), dann `release` (nur wenn der Benutzer veröffentlichen will) – der Discord-Beitrag kommt danach von selbst.
    4. Test-Release zum Ausprobieren: `release --suffix test1` → Version `<version>-test1` wird „latest“. Danach mit OK des Benutzers löschen: `gh release delete v<version>-test1 -R dasdimo/<game_id>-releases --cleanup-tag --yes` – dann ist wieder das vorige Release aktuell.
    5. Neue Bilder oder Screenshots, neuer Untertitel oder anderer Status: `tools/dasdimo/dasdimo.json` ändern, dann `register`.
 2. Committe `tools/dasdimo/` (Skript, Konfiguration, Neuigkeiten, README, Bilder) im Repo deines Spiels, mit verständlicher deutscher Commit-Nachricht.
-3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Ergebnis des Launcher-Tests, bei Format 2 die MB eines normalen Updates (aus `diff`), was noch offen ist, und eine kurze Nachricht für die Freunde („Neues Spiel im DasDimo Launcher: einfach den Launcher öffnen“).
+3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Link zum Discord-Beitrag (falls gepostet), Ergebnis des Launcher-Tests, bei Format 2 die MB eines normalen Updates (aus `diff`), was noch offen ist, und eine kurze Nachricht für die Freunde („Neues Spiel im DasDimo Launcher: einfach den Launcher öffnen“).
 
 ## Fehlerhilfe
 | Meldung | Lösung |
@@ -297,6 +311,11 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 | `… has no release yet` | erst Schritt 10, dann `register` |
 | Launcher: „Manifest ungültig“ | `launcher.log` lesen; meist ein Dateiname mit Leerzeichen/Umlaut oder eine Version mit `v` |
 | Launcher: „ließ sich nicht prüfen“ bei einem Format-2-Spiel | Launcher älter als 1.1.0 – er aktualisiert sich selbst, sonst die Pille „Neuer Launcher“ anklicken |
+| `note: no Discord webhook for '<id>'` | Für dein Spiel ist noch kein Webhook eingerichtet (Schritt 10, „Discord-Beitrag“) – kein Fehler |
+| `DISCORD NOT POSTED: Discord HTTP 401`/`404` | Webhook in Discord gelöscht: Benutzer legt ihn neu an und startet `webhooks_einrichten.cmd`, dann `discord` |
+| `… A tag is required …` | Im Forum ist „Tag erforderlich“ eingeschaltet – der Benutzer schaltet es in den Forum-Einstellungen aus, dann `discord` |
+| `did not create a forum post` / `HTTP 400 … thread_name` | Der Webhook gehört zu einem normalen Kanal statt zu einem Forum – Webhook im Forum anlegen |
+| `… is not a Discord webhook address` | Eintrag in `discord.json` kaputt – Benutzer startet `webhooks_einrichten.cmd` und fügt die Adresse neu ein |
 
 ---
 
@@ -304,14 +323,16 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game (helper version 3, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game (helper version 4, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
 //   node tools/dasdimo/dasdimo_release.js manifest [--suffix test1]  only write the manifest + notes.md
-//   node tools/dasdimo/dasdimo_release.js release [--suffix test1] [--readme]   publish a GitHub release
+//   node tools/dasdimo/dasdimo_release.js release [--suffix test1] [--readme] [--no-discord]   publish a GitHub release
 //   node tools/dasdimo/dasdimo_release.js register [--dry-run]       pictures + entry in the launcher's games.json
 //     (--dry-run also writes <out_dir>/games.local.json: the entry with local pictures, for a test in the launcher)
+//   node tools/dasdimo/dasdimo_release.js discord [--dry-run] [--again] [--version x] [--news <file>]   Discord forum post
+//     (runs by itself after "release" when %APPDATA%\DasDimo\discord.json has a webhook for the game_id)
 // A game is one exe per arch ("path", manifest format 1: every update loads it whole) or a build folder
 // ("dir" + "exe", format 2: the launcher loads only the files that changed).
 // Public commits (README, pictures, games.json) use the GitHub noreply address, never the local git e-mail.
@@ -322,7 +343,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 3;
+const HELPER_VERSION = 4;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -355,6 +376,19 @@ const PICTURES = {
 const SCREENSHOT = { type: "jpg", width: 1920, height: 1080, maxKb: 800 };
 const MAX_SCREENSHOTS = 8;
 const LAUNCHER_PAGE = `https://github.com/${HUB_REPO}`;
+// Discord: one forum post per version through the forum's webhook. The webhook addresses are secret and live only
+// on the user's PC (%APPDATA%\DasDimo\discord.json, set up by the user) - never in git, a repo or a chat.
+const DISCORD_FILE = "discord.json";
+const DISCORD_POSTS_FILE = "discord_posts.json";
+const WEBHOOK_RE = /^https:\/\/discord\.com\/api\/webhooks\/\d{15,22}\/[A-Za-z0-9_-]{30,}$/;
+// Embed text: Discord allows 4096 characters, longer news continue in the next message of the post.
+const DISCORD_LIMIT = 4000;
+const DISCORD_TITLE_LIMIT = 100;
+const DISCORD_COLOR = 0xfd7a10;
+// Pictures of a post: Discord shows up to 4 as one gallery. Together at most 8 MB (Discord: 10 MB per file).
+const DISCORD_IMAGES = 4;
+const DISCORD_IMAGE_BYTES = 8 * 1024 * 1024;
+const IMAGE_TYPES = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif" };
 
 const ROOT = path.resolve(__dirname, "..", "..");
 
@@ -364,11 +398,15 @@ function fail(message) {
 }
 
 function parseArgs(argv) {
-	const args = { command: argv[0] || "help", suffix: "", readme: false, dryRun: false, against: "", config: "tools/dasdimo/dasdimo.json" };
+	const args = { command: argv[0] || "help", suffix: "", readme: false, dryRun: false, again: false, noDiscord: false, version: "", news: "", against: "", config: "tools/dasdimo/dasdimo.json" };
 	for (let i = 1; i < argv.length; i++) {
 		const key = argv[i];
 		if (key === "--readme") args.readme = true;
 		else if (key === "--dry-run") args.dryRun = true;
+		else if (key === "--again") args.again = true;
+		else if (key === "--no-discord") args.noDiscord = true;
+		else if (key === "--version") args.version = argv[++i] || "";
+		else if (key === "--news") args.news = argv[++i] || "";
 		else if (key === "--suffix") args.suffix = argv[++i] || "";
 		else if (key === "--against") args.against = argv[++i] || "";
 		else if (key === "--config") args.config = argv[++i] || "";
@@ -708,9 +746,12 @@ function readNews(cfg, version) {
 	} catch (error) {
 		return { news: [], problems: [cfg.news_file + " is not valid JSON"] };
 	}
+	// A game manifest works too (its "news").
+	if (list && !Array.isArray(list) && Array.isArray(list.news)) list = list.news;
 	if (!Array.isArray(list)) return { news: [], problems: [cfg.news_file + " must be a list"] };
 	const problems = [];
 	const groups = [];
+	const images = {};
 	for (const block of list) {
 		if (!block || !VERSION_RE.test(block.version || "") || !Array.isArray(block.entries)) {
 			problems.push("news block without valid version/entries");
@@ -731,8 +772,13 @@ function readNews(cfg, version) {
 			}
 			group.entries.push({ de: entry.de.trim(), en: entry.en.trim() });
 		}
+		// Pictures for the Discord post only, never in the manifest.
+		if (block.images !== undefined && !Array.isArray(block.images)) problems.push(`news ${block.version}: images must be a list of picture files`);
+		for (const file of Array.isArray(block.images) ? block.images : []) {
+			if (typeof file === "string" && file.trim()) (images[block.version] = images[block.version] || []).push(file.trim());
+		}
 	}
-	return { news: groups, problems };
+	return { news: groups, problems, images };
 }
 
 // ---------- manifest ----------
@@ -958,6 +1004,178 @@ function latestManifest(cfg, against) {
 	return { manifest, label: `${manifest.tag || manifest.version} (${path.basename(file)}, format ${manifest.format || 1})` };
 }
 
+// ---------- Discord ----------
+
+// %APPDATA%\DasDimo on the user's PC (DASDIMO_SETTINGS_DIR: another folder, for tests).
+function settingsDir() {
+	return process.env.DASDIMO_SETTINGS_DIR || path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), "DasDimo");
+}
+
+function readSettings(name) {
+	const file = path.join(settingsDir(), name);
+	if (!fs.existsSync(file)) return {};
+	let data;
+	try {
+		data = JSON.parse(fs.readFileSync(file, "utf8").replace(/^﻿/, ""));
+	} catch (error) {
+		throw new Error(file + " is not valid JSON");
+	}
+	return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+}
+
+// Messages and errors never show a webhook address.
+function hideWebhook(text) {
+	return String(text).replace(/webhooks\/\d+\/[A-Za-z0-9_-]+/g, "webhooks/<hidden>");
+}
+
+// The German news and the listed pictures of a version (the exact version, else its base version: 1.2.0-test1 -> 1.2.0).
+function discordNews(cfg, version) {
+	const { news, images = {} } = readNews(cfg, version);
+	const group = news.find((g) => g.version === version) || news.find((g) => g.version === version.split("-")[0]);
+	if (!group) return { entries: [], images: [] };
+	return { entries: group.entries.map((entry) => entry.de), images: images[group.version] || [] };
+}
+
+// The picture files of a post: the version's "images" from the news, else the game's cover and screenshots.
+// At most DISCORD_IMAGES, together at most DISCORD_IMAGE_BYTES; the others are left out with a note.
+function discordImages(cfg, listed) {
+	const c = cfg.catalog || {};
+	const wanted = listed.length ? listed : [c.cover, ...(c.screenshots || [])].filter(Boolean).slice(0, DISCORD_IMAGES);
+	const files = [];
+	const problems = [];
+	let total = 0;
+	for (const file of wanted) {
+		const full = rel(file);
+		const type = IMAGE_TYPES[path.extname(full).toLowerCase()];
+		const size = fs.existsSync(full) && fs.statSync(full).isFile() ? fs.statSync(full).size : -1;
+		if (files.length >= DISCORD_IMAGES) problems.push(`picture left out, at most ${DISCORD_IMAGES} per post: ${file}`);
+		else if (!type) problems.push(`picture must be .jpg, .png, .webp or .gif: ${file}`);
+		else if (size < 0) problems.push(`picture missing: ${file}`);
+		else if (total + size > DISCORD_IMAGE_BYTES) problems.push(`picture left out, all pictures together at most 8 MB: ${file}`);
+		else {
+			total += size;
+			files.push({ name: `${files.length + 1}-${path.basename(full).replace(/[^0-9A-Za-z._-]/g, "_")}`, full, type, size });
+		}
+	}
+	return { files, problems };
+}
+
+function discordColor(cfg) {
+	const accent = String(cfg.catalog.accent || "");
+	return /^#[0-9A-Fa-f]{6}$/.test(accent) ? parseInt(accent.slice(1), 16) : DISCORD_COLOR;
+}
+
+// The forum post of a version: a new post "<title>", the German news as a list, then where to get it, the pictures
+// (attachment names) under the text. Longer news continue in further messages of the same post.
+// tools/discord/discord_post.ps1 of the launcher builds the same.
+function discordMessages(title, version, entries, color, { images = [], limit = DISCORD_LIMIT } = {}) {
+	const pieces = [];
+	for (const entry of entries.length ? entries : ["Kleine Verbesserungen und Fehlerbehebungen."]) {
+		let line = "- " + entry;
+		while (line.length > limit) {
+			let cut = line.lastIndexOf(" ", limit);
+			if (cut < limit / 2) cut = limit;
+			pieces.push(line.slice(0, cut));
+			line = line.slice(cut).trimStart();
+		}
+		if (line) pieces.push(line);
+	}
+	const chunks = [""];
+	const add = (text, gap) => {
+		const last = chunks[chunks.length - 1];
+		if (!last) chunks[chunks.length - 1] = text;
+		else if (last.length + gap.length + text.length <= limit) chunks[chunks.length - 1] = last + gap + text;
+		else chunks.push(text);
+	};
+	for (const piece of pieces) add(piece, "\n");
+	add(`**Aktualisiere im DasDimo Launcher**\n${LAUNCHER_PAGE}`, "\n\n");
+	return chunks.map((description, i) => {
+		// No pings: allowed_mentions with an empty "parse" ignores @everyone, @here and names in the news.
+		const message = { embeds: [{ description, color }], allowed_mentions: { parse: [] } };
+		if (i) return message;
+		if (images.length) {
+			// Embeds with the same url: Discord shows their pictures as one gallery in the box under the text.
+			Object.assign(message.embeds[0], { url: LAUNCHER_PAGE, image: { url: "attachment://" + images[0] } });
+			for (const name of images.slice(1)) message.embeds.push({ url: LAUNCHER_PAGE, image: { url: "attachment://" + name }, color });
+			message.attachments = images.map((filename, id) => ({ id, filename }));
+		}
+		return { thread_name: title.slice(0, DISCORD_TITLE_LIMIT), content: `Neue Version **${version}** ist da. Das ist neu:`, ...message };
+	});
+}
+
+// One webhook call, Discord's answer as JSON; files ({name, full, type}) go along as attachments.
+// Waits and tries again when Discord says "too many requests".
+async function discordCall(url, body, fetchImpl, files = []) {
+	const headers = { "User-Agent": "DasDimo-release-helper/" + HELPER_VERSION };
+	let payload;
+	if (files.length) {
+		payload = new FormData();
+		payload.append("payload_json", JSON.stringify(body));
+		files.forEach((file, i) => payload.append(`files[${i}]`, new Blob([fs.readFileSync(file.full)], { type: file.type }), file.name));
+	} else if (body) {
+		headers["Content-Type"] = "application/json";
+		payload = JSON.stringify(body);
+	}
+	for (let attempt = 0; ; attempt++) {
+		let response;
+		try {
+			response = await fetchImpl(url, { method: body ? "POST" : "GET", headers, body: payload });
+		} catch (error) {
+			throw new Error(hideWebhook("Discord not reachable: " + error.message));
+		}
+		const text = await response.text();
+		if (response.status === 429 && attempt < 3) {
+			let wait = 2;
+			try {
+				wait = Number(JSON.parse(text).retry_after) || 2;
+			} catch (error) {
+				// keep 2 s
+			}
+			await new Promise((done) => setTimeout(done, Math.min(wait, 10) * 1000));
+			continue;
+		}
+		if (!response.ok) throw new Error(hideWebhook(`Discord HTTP ${response.status}: ${text.slice(0, 300)}`));
+		return text ? JSON.parse(text) : {};
+	}
+}
+
+// Creates the post with the first message and its pictures (onCreated gets {thread, link} right then), adds the
+// other messages to it.
+async function postDiscord(webhook, messages, { files = [], onCreated = () => {}, fetchImpl = fetch } = {}) {
+	const hook = await discordCall(webhook, null, fetchImpl);
+	const first = await discordCall(webhook + "?wait=true", messages[0], fetchImpl, files);
+	const thread = String(first.channel_id || "");
+	if (!/^\d+$/.test(thread)) throw new Error("Discord did not create a forum post (is the webhook in a forum?)");
+	const post = { thread, link: `https://discord.com/channels/${hook.guild_id}/${thread}` };
+	onCreated(post);
+	for (let i = 1; i < messages.length; i++) {
+		try {
+			await discordCall(`${webhook}?wait=true&thread_id=${thread}`, messages[i], fetchImpl);
+		} catch (error) {
+			throw new Error(`post ${post.link} created, but message ${i + 1} of ${messages.length} failed: ${error.message}`);
+		}
+	}
+	return post;
+}
+
+function rememberPost(id, version, post) {
+	const posts = readSettings(DISCORD_POSTS_FILE);
+	posts[id] = { ...(posts[id] || {}), [version]: { thread: post.thread, link: post.link, date: today() } };
+	fs.mkdirSync(settingsDir(), { recursive: true });
+	fs.writeFileSync(path.join(settingsDir(), DISCORD_POSTS_FILE), JSON.stringify(posts, null, "\t") + "\n", "utf8");
+}
+
+function printDiscord(title, messages, files) {
+	console.log(`== Discord post (dry run): ${title} ==`);
+	console.log(messages[0].content);
+	messages.forEach((message, i) => {
+		const text = message.embeds[0].description;
+		console.log(`--- message ${i + 1} of ${messages.length} (${text.length} characters) ---`);
+		console.log(text);
+	});
+	for (const file of files) console.log(`picture ${file.name} (${Math.ceil(file.size / 1024)} KB): ${path.relative(ROOT, file.full)}`);
+}
+
 // ---------- commands ----------
 
 function commandCheck(cfg) {
@@ -975,6 +1193,7 @@ function commandCheck(cfg) {
 		const news = readNews(cfg, baseVersion);
 		problems.push(...news.problems);
 		if (!news.news.some((group) => group.version === baseVersion)) problems.push(`news: no entry for ${baseVersion} yet (${cfg.news_file})`);
+		problems.push(...discordImages(cfg, discordNews(cfg, baseVersion).images).problems.map((problem) => "discord: " + problem));
 	}
 	if (!fs.existsSync(rel(cfg.readme_file))) problems.push("README missing: " + cfg.readme_file);
 	problems.push(...catalogProblems(cfg));
@@ -1017,7 +1236,7 @@ function commandDiff(cfg, args) {
 	}
 }
 
-function commandRelease(cfg, args) {
+async function commandRelease(cfg, args) {
 	const problems = configProblems(cfg);
 	if (problems.length) fail(problems.join("; "));
 	const who = identity();
@@ -1066,6 +1285,8 @@ function commandRelease(cfg, args) {
 	}
 	console.log(`RELEASE OK: https://github.com/${cfg.repo}/releases/tag/${release.tag}`);
 	console.log(`manifest:   https://github.com/${cfg.repo}/releases/latest/download/${manifestName(cfg)}`);
+	if (args.suffix) console.log("Discord: no forum post for a test release");
+	else if (!args.noDiscord) await commandDiscord(cfg, { version: release.version }, true);
 }
 
 function commandRegister(cfg, args) {
@@ -1142,10 +1363,64 @@ function commandRegister(cfg, args) {
 	console.log(`REGISTER OK: ${cfg.game_name} is in https://github.com/${HUB_REPO}/blob/main/${CATALOG_FILE}`);
 }
 
-function main() {
+// The Discord forum post of a version, on its own or right after "release" (auto: the release is done, problems are
+// only reported). A version that was posted before is skipped (--again posts it once more).
+async function commandDiscord(cfg, args, auto = false) {
+	const stop = (message) => {
+		if (!auto) fail(message);
+		console.log(`DISCORD NOT POSTED: ${message} - later: node tools/dasdimo/dasdimo_release.js discord`);
+	};
+	let version = args.version;
+	try {
+		version = version || readVersion(cfg);
+	} catch (error) {
+		return stop(error.message);
+	}
+	if (!VERSION_RE.test(version)) return stop(`invalid version '${version}'`);
+	if (args.news) cfg = { ...cfg, news_file: args.news };
+	const title = `${cfg.game_name} ${version}`;
+	const news = discordNews(cfg, version);
+	const pictures = discordImages(cfg, news.images);
+	for (const problem of pictures.problems) console.log("note: " + problem);
+	const messages = discordMessages(title, version, news.entries, discordColor(cfg), { images: pictures.files.map((file) => file.name) });
+	const hooksFile = path.join(settingsDir(), DISCORD_FILE);
+	let hooks;
+	let posts;
+	try {
+		hooks = readSettings(DISCORD_FILE);
+		posts = readSettings(DISCORD_POSTS_FILE);
+	} catch (error) {
+		return stop(error.message);
+	}
+	const webhook = typeof hooks[cfg.game_id] === "string" ? hooks[cfg.game_id].trim() : "";
+	const before = (posts[cfg.game_id] || {})[version];
+	if (!news.entries.length) console.log(`note: no news for ${version} in ${cfg.news_file} - the post says "Kleine Verbesserungen und Fehlerbehebungen."`);
+	if (args.dryRun) {
+		printDiscord(title, messages, pictures.files);
+		console.log(webhook ? `webhook for '${cfg.game_id}': set` : `note: no webhook for '${cfg.game_id}' in ${hooksFile} - nothing would be posted`);
+		if (before) console.log(`note: already posted on ${before.date}: ${before.link}`);
+		return console.log("DRY RUN: nothing posted");
+	}
+	if (!webhook) return console.log(`note: no Discord webhook for '${cfg.game_id}' in ${hooksFile} - no forum post (INTEGRATION.md, "Discord-Beitrag")`);
+	if (!WEBHOOK_RE.test(webhook)) return stop(`the entry '${cfg.game_id}' in ${hooksFile} is not a Discord webhook address`);
+	if (before && !args.again) return console.log(`Discord: ${title} was already posted (${before.link}) - --again posts it once more`);
+	console.log(`== Discord post: ${title} (${messages.length} message(s)) ==`);
+	try {
+		const post = await postDiscord(webhook, messages, {
+			files: pictures.files,
+			onCreated: (created) => rememberPost(cfg.game_id, version, created),
+		});
+		console.log("DISCORD OK: " + post.link);
+	} catch (error) {
+		return stop(hideWebhook(error.message));
+	}
+}
+
+async function main() {
 	const args = parseArgs(process.argv.slice(2));
-	if (!["check", "diff", "manifest", "release", "register"].includes(args.command)) {
-		console.log("usage: node tools/dasdimo/dasdimo_release.js check | diff [--against <manifest>] | manifest [--suffix x] | release [--suffix x] [--readme] | register [--dry-run]");
+	if (!["check", "diff", "manifest", "release", "register", "discord"].includes(args.command)) {
+		console.log("usage: node tools/dasdimo/dasdimo_release.js check | diff [--against <manifest>] | manifest [--suffix x]"
+			+ " | release [--suffix x] [--readme] [--no-discord] | register [--dry-run] | discord [--dry-run] [--again] [--version x] [--news <file>]");
 		console.log("helper version " + HELPER_VERSION);
 		process.exit(args.command === "help" ? 0 : 1);
 	}
@@ -1159,8 +1434,11 @@ function main() {
 		return console.log("MANIFEST OK (nothing uploaded)");
 	}
 	if (args.command === "release") return commandRelease(cfg, args);
+	if (args.command === "discord") return commandDiscord(cfg, args);
 	return commandRegister(cfg, args);
 }
 
-main();
+// tools/discord/test_discord.js loads the functions without running a command.
+if (require.main === module) main().catch((error) => fail(error.message));
+else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, LAUNCHER_PAGE };
 ```
