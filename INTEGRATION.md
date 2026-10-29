@@ -1,8 +1,9 @@
 # Ein Spiel in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 2 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 2 (Anhang).
-**Neu in Version 2:** Screenshots für die Spielseite (`catalog.screenshots`), Eintrag mit `"type": "game"`, Spiele gibt es nur noch über den Launcher (keine direkten Links auf Spiel-Dateien), Test mit dem DasDimo Launcher (Schritt 11). Hast du schon Version 1 eingerichtet: Skript aus dem Anhang übernehmen, Screenshots ergänzen, README anpassen, dann `register`.
+**Version der Anleitung:** 3 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 3 (Anhang).
+**Neu in Version 3:** Spiele aus **mehreren Dateien** (Build-Ordner, Manifest-Format 2): Bei einem Update lädt der Launcher nur die geänderten Dateien statt des ganzen Spiels (DasDimo Launcher ab 1.1.0). Neuer Befehl `diff` (zeigt vor dem Release, wie viel die Spieler laden), Feld `manifest_name`, die `.zip`-Variante entfällt. Schon eingerichtet? Skript aus dem Anhang übernehmen – mit `path` (eine exe) läuft alles weiter wie bisher; zum Umstieg siehe „Spiel aus mehreren Dateien“ (nur nach Rücksprache mit dem Benutzer).
+**Neu in Version 2:** Screenshots (`catalog.screenshots`), Eintrag mit `"type": "game"`, Spiele nur über den Launcher, Test mit dem Launcher (Schritt 11).
 **Öffentliche Adresse:** https://github.com/dasdimo/dasdimo-launcher-releases/blob/main/INTEGRATION.md
 Zum Lesen in Claude Code: `gh api repos/dasdimo/dasdimo-launcher-releases/contents/INTEGRATION.md -H "Accept: application/vnd.github.raw"`
 
@@ -13,7 +14,7 @@ Lies diese Datei ganz, bevor du anfängst. Arbeite die Schritte der Reihe nach a
 ## Worum es geht
 Der **DasDimo Launcher** ist ein kleines Windows-Programm für die Freunde des Benutzers. Er zeigt alle Spiele von DasDimo, installiert sie mit einem Klick, holt Updates und startet sie. Damit dein Spiel darin erscheint, braucht es:
 1. ein **öffentliches Release-Repo** `dasdimo/<spiel-id>-releases` mit fertigen Builds (der Quellcode bleibt privat),
-2. pro Version ein **GitHub-Release** mit der Spiel-exe für Windows x64 (und wenn möglich ARM64) und einer `manifest.json` mit SHA-256-Prüfsummen,
+2. pro Version ein **GitHub-Release** mit den Spieldateien für Windows x64 (und wenn möglich ARM64) und einem Manifest (`manifest.json`) mit SHA-256-Prüfsummen,
 3. **Bilder** (Icon, Cover, Screenshots) im Release-Repo,
 4. einen **Eintrag in der Spieleliste** `games.json` der Zentrale `dasdimo/dasdimo-launcher-releases`.
 
@@ -27,7 +28,7 @@ Das Hilfs-Skript im Anhang erledigt Manifest, Release, Bilder und Eintrag. Du sc
 3. **Keine private E-Mail in öffentlichen Repos:** In Release-Repos und in der Zentrale **nie** `git commit`/`git push` und kein `gh repo create --add-readme`. Dateien kommen nur über das Hilfs-Skript (GitHub-API mit der noreply-Adresse `<id>+dasdimo@users.noreply.github.com`). Releases selbst erzeugen keine Commits.
 4. **Releases nur per Skript:** immer `dasdimo_release.js release`, nie per Hand im Browser oder mit einzelnen `gh release`-Befehlen (Ausnahme: Test-Release löschen, Schritt 13).
 5. **Downloads nur mit Erlaubnis:** Dateiname, Quelle und Größe nennen und fragen.
-6. **Nur fertige Builds öffentlich:** kein Quellcode, keine Zugangsdaten/Schlüssel, keine Rohdateien von Assets, die nicht weitergegeben werden dürfen (z. B. Mixamo-FBX). In einer fertigen exe eingebaut ist in Ordnung.
+6. **Nur fertige Builds öffentlich:** kein Quellcode, keine Zugangsdaten/Schlüssel, keine Rohdateien von Assets, die nicht weitergegeben werden dürfen (z. B. Mixamo-FBX). In einer fertigen exe oder einem Paket (`.pck`) eingebaut ist in Ordnung.
 7. **Nur dein eigener Eintrag:** Ändere in `games.json` nie andere Spiele (das Skript ändert nur den Eintrag mit deiner `game_id`). Am Launcher-Code arbeitest du nicht; Wünsche oder Fehler am Launcher meldest du dem Benutzer.
 8. `builds/` und `builds/dasdimo-release/` nicht ins Git deines Spiels committen. PowerShell-Skripte (`.ps1`) nur mit ASCII-Zeichen schreiben (Windows PowerShell 5.1).
 
@@ -50,21 +51,43 @@ Lies die Projektregeln deines Spiels (z. B. `CLAUDE.md`). Zeig dem Benutzer kurz
 | Akzentfarbe | Hex `#RRGGBB`, passend zum Spiel (Knopf und Leuchten im Launcher) | `#FF5A1F` |
 | ARM64-Version | ja, wenn die Engine es kann (Snapdragon-Laptops), sonst nur x64 | ja |
 | Status | `testing` (sichtbar mit Abzeichen „Test“), `released`, `hidden` (nur zum Ausprobieren) | `testing` |
+| Build-Ordner oder eine exe | Build-Ordner (Format 2, Updates laden nur geänderte Dateien) oder eine exe (Format 1, jedes Update lädt alles) – Schritt 2 | Build-Ordner |
 
 ## Schritt 2 – Spiel vorbereiten
 Dein Build muss diese Punkte erfüllen. Prüfe jeden und repariere, was fehlt:
-- **Startet ohne Installer und ohne Admin-Rechte** per Doppelklick aus jedem Ordner, z. B. `%LOCALAPPDATA%\DasDimo-Launcher\Games\<game_id>\versions\1.2.0\`. Pfade mit Leerzeichen und Umlauten müssen gehen.
-- **Schreibt nichts neben die exe.** Der Versionsordner wird bei Updates gelöscht. Einstellungen, Spielstände und Logs gehören nach `%APPDATA%`, `%LOCALAPPDATA%` oder `%USERPROFILE%\AppData\LocalLow` (Godot `user://` = `%APPDATA%\Godot\app_userdata\<Projektname>` – das passt). Notiere diese Ordner für Schritt 5 (`user_data_dirs`).
+- **Startet ohne Installer und ohne Admin-Rechte** per Doppelklick aus jedem Ordner, z. B. `%LOCALAPPDATA%\DasDimo-Launcher\Games\<game_id>\game\`. Pfade mit Leerzeichen und Umlauten müssen gehen.
+- **Schreibt nichts neben die exe.** Der Spielordner gehört dem Launcher: Updates tauschen dort Dateien aus, Deinstallieren löscht ihn. Einstellungen, Spielstände und Logs gehören nach `%APPDATA%`, `%LOCALAPPDATA%` oder `%USERPROFILE%\AppData\LocalLow` (Godot `user://` = `%APPDATA%\Godot\app_userdata\<Projektname>` – das passt). Notiere diese Ordner für Schritt 5 (`user_data_dirs`).
 - **Verlässt sich nicht auf das Arbeitsverzeichnis** und braucht **keine Start-Argumente** (der Launcher startet die exe ohne Argumente).
 - **Kein eigenes Update-System** im Spiel, keine Zusatz-Installer (z. B. VC++-Pakete) nötig.
-- **Eine Datei:** am besten eine einzelne `.exe` (Format 1). Besteht dein Spiel aus einem Ordner, wird er als `.zip` verpackt (Format 2, Schritt 7) – das kann der Launcher erst ab Phase L4, frag den Benutzer, ob er so lange warten will.
-- **Version an einer Stelle** im Projekt (z. B. `project.godot` → `config/version`), Form `1.2.3`, und dieselbe Version in der Windows-Dateiinfo der exe.
+- **Build-Ordner oder eine exe:**
+  - **Build-Ordner (Format 2, empfohlen):** Startdatei + Spieldaten als einzelne Dateien. Bei einem Update lädt der Launcher nur, was sich geändert hat – oft wenige MB statt des ganzen Spiels. Details im nächsten Abschnitt.
+  - **Eine exe (Format 1):** am einfachsten, aber jedes Update lädt das ganze Spiel. Gut für kleine Spiele (unter etwa 50 MB).
+- **Version an einer Stelle** im Projekt (z. B. `project.godot` → `config/version`), Form `1.2.3`.
 
 **Engine-Hinweise:**
-- **Godot 4:** Export „Windows Desktop“ mit `binary_format/embed_pck=true` → eine exe. Für ARM64 ein zweites Preset mit `binary_format/architecture="arm64"` (die offiziellen Export-Vorlagen enthalten `windows_release_arm64.exe`; prüfe den Vorlagen-Ordner und frag vor einem Download). Auf Snapdragon läuft Direct3D 12 meist besser als Vulkan: RIFTWAKE setzt im ARM64-Preset `custom_features="force_d3d12"` und im Projekt `rendering/rendering_device/driver.force_d3d12="d3d12"`.
-- **Unity:** Windows-Build x64 (und ARM64, wenn die Unity-Version es anbietet) ist ein Ordner → `.zip`, Format 2.
-- **Unreal:** Ordner → `.zip`, Format 2; meist nur x64.
-- **Andere Engines:** eine exe → Format 1, sonst `.zip` → Format 2.
+- **Godot 4:** Export „Windows Desktop“. Build-Ordner: `binary_format/embed_pck=false` → `Spiel.exe` + `Spiel.pck`, jede Plattform in einen eigenen Ordner exportieren (die exe sucht die `.pck` mit gleichem Namen daneben). Eine exe: `embed_pck=true`. Für ARM64 ein zweites Preset mit `binary_format/architecture="arm64"` (die offiziellen Export-Vorlagen enthalten `windows_release_arm64.exe`; prüfe den Vorlagen-Ordner und frag vor einem Download). Auf Snapdragon läuft Direct3D 12 meist besser als Vulkan: RIFTWAKE setzt im ARM64-Preset `custom_features="force_d3d12"` und im Projekt `rendering/rendering_device/driver.force_d3d12="d3d12"`.
+- **Unity:** Der Windows-Build ist ein Ordner (`Spiel.exe`, `Spiel_Data/`, `UnityPlayer.dll` …) → Build-Ordner. Weglassen (`exclude`): `*_BurstDebugInformation_DoNotShip/**`, `*.pdb`.
+- **Unreal:** Ordner `Windows/` → Build-Ordner, meist nur x64. Weglassen: `*.pdb`.
+- **Andere Engines:** Ordner → Build-Ordner, eine einzelne exe → Format 1.
+
+### Spiel aus mehreren Dateien (Format 2)
+**So funktioniert es:** Das Manifest nennt jede Datei des Build-Ordners mit Pfad, Größe und SHA-256. Der Launcher vergleicht das mit dem installierten Spiel und lädt nur neue und geänderte Dateien; Dateien, die es nicht mehr gibt, löscht er. Alles landet zuerst in einem Zwischenordner und wird dann in einem Schritt ausgetauscht – bricht ein Update ab, bleibt das alte Spiel spielbar, und fertige Dateien werden beim nächsten Versuch nicht noch einmal geladen. Im Menü der Spielseite gibt es „Spieldateien prüfen“: Der Launcher findet kaputte Dateien und lädt nur diese neu.
+
+**Launcher-Version:** Format 2 braucht den DasDimo Launcher 1.1.0 oder neuer. Ältere Launcher zeigen bei deinem Spiel „ließ sich nicht prüfen“ (die installierte Version bleibt spielbar), bis sie sich aktualisiert haben. Ein Spiel, das schon im Launcher ist, stellst du deshalb nur nach Rücksprache mit dem Benutzer um. Beim Umstieg laden die Spieler einmal das ganze Spiel, danach nur noch Änderungen.
+
+**Damit Updates wirklich klein werden:**
+1. **Die exe bleibt gleich.** Sie ist meist die Engine (bei Godot rund 100 MB) und soll sich nur ändern, wenn sich die Engine-Version ändert.
+   - Godot: Im Export-Preset `application/file_version` und `application/product_version` fest setzen, z. B. `1.0.0.0`. Leer heißt „Spielversion“, und dann ist die exe bei jedem Release neu. Icon und Firmenname nicht ändern.
+   - Dateinamen ohne Versionsnummer (`Beispielspiel.exe`, nicht `Beispielspiel-v0.2.0.exe`): Ein neuer Name ist für den Launcher eine neue Datei.
+2. **Große Inhalte in eigene Pakete** (optional, lohnt sich ab etwa 50 MB Spieldaten). Das Hauptpaket ändert sich bei jeder Code-Änderung. Liegen Texturen, Modelle, Karten und Sounds in eigenen Dateien, lädt ein normales Update nur das kleine Hauptpaket.
+   - Godot: zusätzliche Export-Presets mit Ressourcen-Filter, exportiert mit `godot --headless --export-pack "<Preset>" builds/x64/packs/textures.pck`; das Hauptpaket schließt diese Ordner aus. Skripte bleiben im Hauptpaket.
+   - Godot laden: ganz am Anfang, im `_init()` des ersten Autoloads, jedes Paket mit `ProjectSettings.load_resource_pack(OS.get_executable_path().get_base_dir().path_join("packs/textures.pck"))`. Im Editor nicht (`OS.has_feature("editor")`). Fehlt ein Paket, zeigt das Spiel einen klaren Fehler.
+   - Pakete einmal exportieren und in beide Build-Ordner (x64 und ARM64) kopieren. Gleiche Dateien lädt das Skript nur einmal hoch (`"arch": "all"`).
+   - Unity: Addressables/AssetBundles; Unreal: Pak-Chunks. Nur wenn der Benutzer es will – ein Build-Ordner ohne Pakete funktioniert auch.
+3. **Gleiche Eingabe → gleiche Datei:** Zweimal ohne Änderung exportieren muss dieselbe SHA-256 ergeben (`Get-FileHash`). Sonst laden die Spieler jedes Mal alles neu.
+4. **Vor jedem Release `diff`** (Schritt 9): zeigt pro Plattform, welche Dateien und wie viele MB die Spieler laden, und warnt, wenn sich die exe geändert hat.
+
+**Grenzen** (prüft das Skript): Pfade höchstens 200 Zeichen und 16 Ordner tief, keine leeren Dateien, keine Windows-Sondernamen (`CON`, `NUL` …), höchstens 900 Release-Dateien (GitHub erlaubt 1000), jede Datei höchstens 2 GB. Viele kleine Dateien gehen, laden aber langsamer – lieber bündeln.
 
 ## Schritt 3 – Release-Repo anlegen (erst nach Ja des Benutzers)
 ```powershell
@@ -73,9 +96,9 @@ gh repo create dasdimo/<game_id>-releases --public --description "<Name> – Spi
 Keine Optionen `--add-readme`, `--clone` oder `--source` (sonst Commit mit privater E-Mail). Die README kommt beim ersten Release über das Skript.
 
 ## Schritt 4 – Builds und Dateinamen
-- Builds landen im Projekt unter `builds/` (nicht in Git).
-- Dateinamen: `<Name>-v<version>.exe` (x64) und `<Name>-v<version>-arm64.exe` (ARM64), bei Zips `.zip`. Nur `A–Z a–z 0–9 . _ -`, keine Leerzeichen/Umlaute (`Beispielspiel-v0.1.0.exe`).
-- Das Skript liest die Version aus deinem Projekt und setzt sie für `{version}` ein.
+- Builds landen im Projekt unter `builds/` (nicht in Git). Das Skript liest die Version aus deinem Projekt und setzt sie für `{version}` ein.
+- **Build-Ordner (Format 2):** ein Ordner pro Plattform, z. B. `builds/x64/` und `builds/arm64/`, darin die Startdatei mit festem Namen (`Beispielspiel.exe`). Nur Dateien, die zum Spiel gehören – Debug-Dateien (`*.pdb`) über `exclude` weglassen.
+- **Eine exe (Format 1):** `<Name>-v<version>.exe` (x64) und `<Name>-v<version>-arm64.exe` (ARM64). Nur `A–Z a–z 0–9 . _ -`, keine Leerzeichen/Umlaute (`Beispielspiel-v0.1.0.exe`).
 
 ## Schritt 5 – Konfiguration `tools/dasdimo/dasdimo.json`
 Lege diese Datei in deinem Projekt an (Beispiel, anpassen):
@@ -88,8 +111,8 @@ Lege diese Datei in deinem Projekt an (Beispiel, anpassen):
 	"version_file": "project.godot",
 	"version_pattern": "^config/version=\"([^\"]+)\"",
 	"files": [
-		{"arch": "x86_64", "path": "builds/Beispielspiel-v{version}.exe"},
-		{"arch": "arm64", "path": "builds/Beispielspiel-v{version}-arm64.exe"}
+		{"arch": "x86_64", "dir": "builds/x64", "exe": "Beispielspiel.exe", "exclude": ["*.pdb"]},
+		{"arch": "arm64", "dir": "builds/arm64", "exe": "Beispielspiel.exe", "exclude": ["*.pdb"]}
 	],
 	"news_file": "tools/dasdimo/news.json",
 	"readme_file": "tools/dasdimo/README.md",
@@ -106,11 +129,13 @@ Lege diese Datei in deinem Projekt an (Beispiel, anpassen):
 	}
 }
 ```
+Mit einer einzelnen exe (Format 1) stehen in `files` stattdessen `{"arch": "x86_64", "path": "builds/Beispielspiel-v{version}.exe"}` und `{"arch": "arm64", "path": "builds/Beispielspiel-v{version}-arm64.exe"}`.
 
 | Feld | Bedeutung |
 |---|---|
 | `version_file` + `version_pattern` | Datei und regulärer Ausdruck (eine Klammer = die Version). Alternativ fest: `"version": "0.1.0"` |
-| `files` | eine Zeile pro Plattform, `x86_64` Pflicht. Bei `.zip` zusätzlich `"exe": "Spiel.exe"` (Startdatei im Zip, relativer Pfad) |
+| `files` | eine Zeile pro Plattform, `x86_64` Pflicht. Build-Ordner: `dir` (Ordner, darf `{version}` enthalten) + `exe` (Startdatei darin, bei allen Plattformen gleich), optional `exclude` (`*.pdb` gilt für Dateinamen überall, `logs/**` für einen Pfad ab dem Build-Ordner). Eine exe: `path`. Nicht mischen |
+| `manifest_name` | optional, Standard `manifest.json`. Nur ändern, wenn der Benutzer es sagt (RIFTWAKE: `riftwake.json`), und danach nie mehr – `games.json` zeigt auf diesen Namen |
 | `news_file`, `readme_file` | Standardwerte wie oben; `out_dir` (Standard `builds/dasdimo-release`) für Manifest + Notizen |
 | `catalog.user_data_dirs` | Ordner aus Schritt 2, nur unter `%APPDATA%\`, `%LOCALAPPDATA%\`, `%USERPROFILE%\AppData\LocalLow\`. Werden nur gelöscht, wenn ein Spieler beim Deinstallieren „Auch Einstellungen löschen“ anhakt. Leer lassen (`[]`), wenn unklar |
 | `catalog.status` | aus Schritt 1 |
@@ -128,45 +153,44 @@ Lege sie unter `tools/dasdimo/art/` ab (sie gehören ins Git deines Spiels):
 
 Herkunft: echte Szenen aus dem Spiel (Screenshot-Funktion der Engine in voller Auflösung, gute Kamera) und das vorhandene Spiel-Icon. Keine Klötzchen-Platzhalter. **Zeig die Bilder dem Benutzer** (Datei schicken) und warte auf sein OK. Externe Bilder nur mit passender Lizenz und Eintrag in den Credits deines Spiels.
 
-## Schritt 7 – `manifest.json` (schreibt das Skript – nur zum Verstehen)
-Das Skript schreibt pro Release diese Datei. Der Launcher prüft sie streng; eine ungültige Datei führt nie zu einem Download.
+## Schritt 7 – Das Manifest (schreibt das Skript – nur zum Verstehen)
+Das Skript schreibt pro Release diese Datei (`manifest.json` oder `manifest_name`). Der Launcher prüft sie streng; eine ungültige Datei führt nie zu einem Download. Format 2 (Build-Ordner):
 
 ```json
 {
-	"format": 1,
+	"format": 2,
 	"game": "Beispielspiel",
 	"game_id": "beispielspiel",
 	"repo": "dasdimo/beispielspiel-releases",
-	"version": "0.1.0",
-	"tag": "v0.1.0",
-	"date": "2026-10-28",
+	"version": "0.2.0",
+	"tag": "v0.2.0",
+	"date": "2026-11-15",
 	"launcher_version": "",
+	"exe": "Beispielspiel.exe",
 	"files": [
-		{
-			"kind": "game",
-			"arch": "x86_64",
-			"name": "Beispielspiel-v0.1.0.exe",
-			"size": 98765432,
-			"sha256": "64 Hex-Zeichen …",
-			"url": "https://github.com/dasdimo/beispielspiel-releases/releases/download/v0.1.0/Beispielspiel-v0.1.0.exe"
-		}
+		{"path": "Beispielspiel.exe", "arch": "x86_64", "size": 109268480, "sha256": "64 Hex-Zeichen …", "url": "https://github.com/dasdimo/beispielspiel-releases/releases/download/v0.2.0/3f9a1c2b7d12-Beispielspiel.exe"},
+		{"path": "Beispielspiel.exe", "arch": "arm64", "size": 91662336, "sha256": "…", "url": "…/v0.2.0/8b20e4f5a913-Beispielspiel.exe"},
+		{"path": "Beispielspiel.pck", "arch": "all", "size": 6100000, "sha256": "…", "url": "…/v0.2.0/c41d9e07ab55-Beispielspiel.pck"},
+		{"path": "packs/textures.pck", "arch": "all", "size": 31000000, "sha256": "…", "url": "…/v0.2.0/77fe0a1c3b42-textures.pck"}
 	],
 	"news": [
-		{"version": "0.1.0", "date": "2026-10-28", "entries": [{"de": "Erste Version zum Testen.", "en": "First version for testing."}]}
+		{"version": "0.2.0", "date": "2026-11-15", "entries": [{"de": "Neue Karte: Hafen.", "en": "New map: Harbour."}]}
 	]
 }
 ```
+Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"kind": "game", "arch": "x86_64", "name": "Beispielspiel-v0.1.0.exe", "size": …, "sha256": "…", "url": "…/v0.1.0/Beispielspiel-v0.1.0.exe"}`.
 
 | Feld | Regel |
 |---|---|
-| `format` | `1` = einzelne exe-Dateien. `2` = mindestens eine `.zip` (dann pro Zip-Datei `"exe": "<Startdatei im Zip>"`). Der Launcher lehnt höhere Formate ab, als er kennt |
+| `format` | `2` = Build-Ordner, jede Datei einzeln (DasDimo Launcher ab 1.1.0). `1` = eine exe pro Plattform. Der Launcher lehnt höhere Formate ab, als er kennt |
 | `version` | `MAJOR.MINOR.PATCH`, optional `-zusatz` aus `0-9 A-Z a-z .` (z. B. `0.2.1-test1`); ohne führendes `v`. Eine Version mit Zusatz ist **älter** als ohne: `0.2.1-test1` < `0.2.1` < `0.2.2` |
 | `tag` | `v` + Version (Git-Tag des Releases) |
-| `files[].kind` | immer `game` (`launcher` und `setup` gibt es nur in der Zentrale, `launcher` außerdem im RIFTWAKE-Repo für den Wechsel vom alten RIFTWAKE-Launcher) |
-| `files[].arch` | `x86_64` oder `arm64`. Fehlt `arm64`, nimmt ein Snapdragon-PC die x64-Datei (läuft emuliert) |
-| `files[].name` | Dateiname ohne Pfad: beginnt mit Buchstabe/Ziffer, dann nur `A–Z a–z 0–9 . _ -`, endet auf `.exe` (Format 1) oder `.zip` (Format 2) |
-| `files[].size`, `sha256` | Bytes und SHA-256 (64 Hex-Zeichen) – der Launcher prüft beides nach dem Download |
-| `files[].url` | voller `https://`-Link zur Datei im Release |
+| `exe` | Format 2: Startdatei, Pfad im Spielordner; muss in den Dateien jeder Plattform stecken |
+| `files[].path` | Format 2: Pfad im Spielordner mit `/`, z. B. `packs/maps.pck`. Nie `..`, `\`, `:` oder Laufwerk, höchstens 200 Zeichen; Groß-/Kleinschreibung zählt nicht (kein Pfad doppelt) |
+| `files[].arch` | `x86_64`, `arm64` oder (Format 2) `all` = für beide. Ein PC bekommt die Dateien seiner Plattform + `all`. Gibt es keine `arm64`-Dateien, nimmt ein Snapdragon-PC die x64-Dateien (läuft emuliert) |
+| `files[].kind`, `files[].name` | Format 1: `kind` immer `game` (`launcher` und `setup` gibt es nur in der Zentrale und für den Wechsel vom alten RIFTWAKE-Launcher); `name` = Dateiname ohne Pfad, beginnt mit Buchstabe/Ziffer, dann nur `A–Z a–z 0–9 . _ -`, endet auf `.exe` |
+| `files[].size`, `sha256` | Bytes (mehr als 0) und SHA-256 (64 Hex-Zeichen). Der Launcher prüft beides nach dem Download und erkennt daran, was sich geändert hat |
+| `files[].url` | voller Link zur Datei im Release (`https://github.com/dasdimo/…`). Format 2: Name im Release = die ersten 12 Zeichen der SHA-256 + Dateiname, weil GitHub keine Ordner kennt und beide Plattformen eine `Beispielspiel.exe` haben |
 | `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN |
 | `launcher_version` | bei Spielen immer `""` |
 
@@ -192,25 +216,32 @@ Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im S
    ```powershell
    node tools/dasdimo/dasdimo_release.js check
    ```
-   Muss mit `CHECK OK` enden. Jede `PROBLEM`-Zeile sagt, was fehlt (Größe der Bilder, Version, Dateien, Neuigkeiten …).
+   Muss mit `CHECK OK` enden. Jede `PROBLEM`-Zeile sagt, was fehlt (Größe der Bilder, Version, Dateien, Neuigkeiten …). Bei einem Build-Ordner steht pro Plattform, wie viele Dateien und MB es sind.
 4. Probelauf ohne Upload:
    ```powershell
    node tools/dasdimo/dasdimo_release.js manifest
    ```
-   Schreibt `builds/dasdimo-release/v<version>/manifest.json` + `notes.md`. Kurz ansehen.
-5. Leg im eigenen Projekt ein kleines Release-Skript oder einen Abschnitt in der Doku an („Neue Version veröffentlichen“ – Schritt 13), damit spätere Sitzungen den Ablauf finden.
+   Schreibt `builds/dasdimo-release/v<version>/manifest.json` (bzw. `manifest_name`) + `notes.md`. Kurz ansehen.
+5. Gibt es schon ein Release: vergleichen, was die Spieler laden würden:
+   ```powershell
+   node tools/dasdimo/dasdimo_release.js diff
+   ```
+   Zeigt pro Plattform die geänderten, neuen und entfernten Dateien und die MB (mit `--against <datei>` gegen ein Manifest auf der Festplatte). Nenne dem Benutzer vor jedem Release die MB. `WARNING: the start file … changed` ohne Engine-Wechsel heißt: Die exe ist nicht fest (Abschnitt „Spiel aus mehreren Dateien“, Punkt 1).
+6. Leg im eigenen Projekt ein kleines Release-Skript oder einen Abschnitt in der Doku an („Neue Version veröffentlichen“ – Schritt 13), damit spätere Sitzungen den Ablauf finden.
 
 ## Schritt 10 – Erstes Release (erst nach Ja des Benutzers)
 Sag dem Benutzer, was hochgeladen wird (Dateien, Größen, Repo) und frag. Dann:
 ```powershell
 node tools/dasdimo/dasdimo_release.js release --readme
 ```
-Das Skript prüft das Konto, lädt die README (noreply), erstellt das Release `v<version>` mit allen Builds und **zuletzt** `manifest.json`, markiert es als „latest“ und vergleicht danach jede Datei per SHA-256 mit GitHub. Am Ende steht `RELEASE OK` mit Link. Bei einem schon vorhandenen Release mit gleicher Version lädt es nur geänderte Dateien neu.
+Das Skript prüft das Konto und lädt die README (noreply). Dann erstellt es das Release `v<version>`, zuerst nicht als „latest“ – so lange liest der Launcher noch das vorige Release. Es lädt alle Spieldateien und **zuletzt** das Manifest hoch, markiert das Release als „latest“ und vergleicht jede Datei per SHA-256 mit GitHub. Am Ende steht `RELEASE OK` mit Link.
+- Jedes Release enthält alle Dateien des Spiels; die Spieler laden trotzdem nur geänderte. Alte Releases darfst du darum später löschen.
+- Gibt es das Release mit dieser Version schon, lädt das Skript nur geänderte Dateien neu und entfernt Dateien, die das neue Manifest nicht mehr nennt.
 
 ## Schritt 11 – Mit dem Launcher testen
 Du testest mit dem **DasDimo Launcher** und einer lokalen Spieleliste, die nur dein Spiel enthält – so siehst du die Spielseite genau wie später, bevor etwas in der Zentrale steht.
 
-**Launcher finden:** Hat der Benutzer ihn installiert, liegt er unter `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\DasDimoLauncher.exe`. Fehlt er, bitte den Benutzer, ihn über den Installer von https://github.com/dasdimo/dasdimo-launcher-releases zu installieren (ein Klick, keine Admin-Rechte).
+**Launcher finden:** Hat der Benutzer ihn installiert, liegt er unter `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\DasDimoLauncher.exe` (für Format 2 mindestens Version 1.1.0 – steht in den Einstellungen). Fehlt er, bitte den Benutzer, ihn über den Installer von https://github.com/dasdimo/dasdimo-launcher-releases zu installieren (ein Klick, keine Admin-Rechte).
 
 1. Lokale Spieleliste schreiben (lädt nichts hoch):
    ```powershell
@@ -225,10 +256,10 @@ Du testest mit dem **DasDimo Launcher** und einer lokalen Spieleliste, die nur d
    & $launcher -- "--catalog-url=$list" "--root-dir=$test" --portable --game=<game_id> --auto-update --quit-when-done | Out-Null
    Get-Content "$test\Launcher\launcher.log"; Get-Content "$test\Games\<game_id>\installed.json"
    ```
-   Erwartet: im Log `games.json: 1 game(s)` und `installed <version>`; in `installed.json` `"current": "<version>"`. Mit `--arch=arm64` prüfst du die ARM64-Auswahl. `--root-dir` hält alles im Testordner (die echte Installation des Benutzers bleibt unberührt), `--portable` verhindert die Frage „Launcher installieren?“.
+   Erwartet: im Log `games.json: 1 game(s)` und `installed <version>`; in `installed.json` `"version": "<version>"`, das Spiel liegt in `$test\Games\<game_id>\game\`. Mit `--arch=arm64` prüfst du die ARM64-Auswahl. `--root-dir` hält alles im Testordner (die echte Installation des Benutzers bleibt unberührt), `--portable` verhindert die Frage „Launcher installieren?“. Bei Format 2 steht im Log nach jedem Update `loaded <n> of <m> files` – so siehst du, dass nur geänderte Dateien kommen.
 3. Test mit dem Benutzer: denselben Befehl **ohne** `--auto-update --quit-when-done` starten. Der Launcher zeigt nur dein Spiel – mit Icon, Cover, Screenshots und Neuigkeiten. Bitte den Benutzer, sich die Seite anzusehen, auf **Spielen** zu klicken, und frag, ob alles passt und das Spiel startet.
 4. Danach den Testordner löschen (`$env:TEMP\dasdimo-launcher-test\<game_id>`).
-5. Meldet der Launcher einen Fehler: der Grund steht in `$test\Launcher\launcher.log` (z. B. `files[0].name invalid` oder `HTTP 404`, wenn das Release fehlt).
+5. Meldet der Launcher einen Fehler: der Grund steht in `$test\Launcher\launcher.log` (z. B. `files[0].path invalid` oder `HTTP 404`, wenn das Release fehlt).
 
 Mit `status: hidden` ist das Spiel nach Schritt 12 nur sichtbar, wenn der Launcher mit `-- --show-hidden` gestartet wird.
 
@@ -243,22 +274,28 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 1. Im eigenen Projekt dokumentieren (z. B. `CLAUDE.md`/Übergabe-Datei): Release-Repo, `tools/dasdimo/`, Ablauf „Neue Version veröffentlichen“:
    1. Version im Projekt erhöhen, `news.json` ergänzen (DE+EN).
    2. Builds x64 + ARM64 bauen, Tests deines Spiels grün.
-   3. `node tools/dasdimo/dasdimo_release.js check`, dann `release` (nur wenn der Benutzer veröffentlichen will).
+   3. `node tools/dasdimo/dasdimo_release.js check`, dann `diff` (dem Benutzer die MB nennen), dann `release` (nur wenn der Benutzer veröffentlichen will).
    4. Test-Release zum Ausprobieren: `release --suffix test1` → Version `<version>-test1` wird „latest“. Danach mit OK des Benutzers löschen: `gh release delete v<version>-test1 -R dasdimo/<game_id>-releases --cleanup-tag --yes` – dann ist wieder das vorige Release aktuell.
    5. Neue Bilder oder Screenshots, neuer Untertitel oder anderer Status: `tools/dasdimo/dasdimo.json` ändern, dann `register`.
 2. Committe `tools/dasdimo/` (Skript, Konfiguration, Neuigkeiten, README, Bilder) im Repo deines Spiels, mit verständlicher deutscher Commit-Nachricht.
-3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Ergebnis des Launcher-Tests, was noch offen ist (z. B. Zip-Spiel wartet auf L4), und eine kurze Nachricht für die Freunde („Neues Spiel im DasDimo Launcher: einfach den Launcher öffnen“).
+3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Ergebnis des Launcher-Tests, bei Format 2 die MB eines normalen Updates (aus `diff`), was noch offen ist, und eine kurze Nachricht für die Freunde („Neues Spiel im DasDimo Launcher: einfach den Launcher öffnen“).
 
 ## Fehlerhilfe
 | Meldung | Lösung |
 |---|---|
 | `gh is logged in as '…'` | `gh auth status`; mit dem Konto `dasdimo` anmelden (Benutzer fragen) |
 | `… does not exist yet` | Schritt 3 |
-| `build missing: …` | Build fehlt oder Dateiname passt nicht zu `files[].path` |
+| `build missing: …`, `build folder missing: …` | Build fehlt, oder `path`/`dir` passt nicht zum Build |
+| `start file … not in …` | `exe` passt nicht zum Namen der Startdatei im Build-Ordner |
+| `empty file`, `name reserved by Windows`, `character not allowed in Windows` | Datei umbenennen oder über `exclude` weglassen |
+| `… release files - at most 900` | kleine Dateien zu Paketen bündeln |
+| `no file of its own` | x64- und ARM64-Ordner sind gleich – nur `x86_64` eintragen |
+| `WARNING: the start file … changed` | Abschnitt „Spiel aus mehreren Dateien“, Punkt 1 (nach einem Engine-Update normal) |
 | `news: no entry for <version>` | `news.json` für die neue Version ergänzen |
 | `catalog.cover … must be 1920x1080` | Bild in genau dieser Größe neu speichern (gilt auch für `catalog.screenshots[…]`) |
 | `… has no release yet` | erst Schritt 10, dann `register` |
-| Launcher: „Manifest ungültig“ | `launcher.log` lesen; meist Dateiname mit Leerzeichen/Umlaut oder Version mit `v` |
+| Launcher: „Manifest ungültig“ | `launcher.log` lesen; meist ein Dateiname mit Leerzeichen/Umlaut oder eine Version mit `v` |
+| Launcher: „ließ sich nicht prüfen“ bei einem Format-2-Spiel | Launcher älter als 1.1.0 – er aktualisiert sich selbst, sonst die Pille „Neuer Launcher“ anklicken |
 
 ---
 
@@ -266,13 +303,16 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game (helper version 2, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game (helper version 3, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
-//   node tools/dasdimo/dasdimo_release.js manifest [--suffix test1]  only write manifest.json + notes.md
+//   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
+//   node tools/dasdimo/dasdimo_release.js manifest [--suffix test1]  only write the manifest + notes.md
 //   node tools/dasdimo/dasdimo_release.js release [--suffix test1] [--readme]   publish a GitHub release
 //   node tools/dasdimo/dasdimo_release.js register [--dry-run]       pictures + entry in the launcher's games.json
 //     (--dry-run also writes <out_dir>/games.local.json: the entry with local pictures, for a test in the launcher)
+// A game is one exe per arch ("path", manifest format 1: every update loads it whole) or a build folder
+// ("dir" + "exe", format 2: the launcher loads only the files that changed).
 // Public commits (README, pictures, games.json) use the GitHub noreply address, never the local git e-mail.
 "use strict";
 const fs = require("fs");
@@ -281,7 +321,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 2;
+const HELPER_VERSION = 3;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -289,10 +329,22 @@ const NEWS_VERSIONS = 3;
 const ARCHES = ["x86_64", "arm64"];
 const STATUSES = ["testing", "released", "hidden"];
 const VERSION_RE = /^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$/;
-const NAME_RE = /^[0-9A-Za-z][0-9A-Za-z._-]*\.(exe|zip)$/;
+const NAME_RE = /^[0-9A-Za-z][0-9A-Za-z._-]*\.exe$/;
+const MANIFEST_NAME_RE = /^[0-9A-Za-z][0-9A-Za-z._-]*\.json$/;
 const ID_RE = /^[a-z0-9][a-z0-9-]{1,31}$/;
 const REPO_RE = /^dasdimo\/[A-Za-z0-9._-]+-releases$/;
 const DATA_DIR_RE = /^%(APPDATA|LOCALAPPDATA)%\\.+|^%USERPROFILE%\\AppData\\LocalLow\\.+/;
+// Game file paths: the same rules as the launcher (core/game_files.gd).
+const MAX_PATH_LENGTH = 200;
+const MAX_DEPTH = 16;
+const RESERVED_RE = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
+const MAX_FILES = 2000;
+// GitHub allows 1000 files per release.
+const MAX_ASSETS = 900;
+// Release file of a format 2 game: SHA-256 start + file name (GitHub has no folders, both builds have Game.exe).
+const ASSET_RE = /^[0-9a-f]{12}-/;
+const UPLOAD_BATCH = 40;
+const LIST_LINES = 30;
 const PICTURES = {
 	icon: { type: "png", width: 256, height: 256, maxKb: 300, required: true },
 	cover: { type: "jpg", width: 1920, height: 1080, maxKb: 800, required: true },
@@ -311,12 +363,13 @@ function fail(message) {
 }
 
 function parseArgs(argv) {
-	const args = { command: argv[0] || "help", suffix: "", readme: false, dryRun: false, config: "tools/dasdimo/dasdimo.json" };
+	const args = { command: argv[0] || "help", suffix: "", readme: false, dryRun: false, against: "", config: "tools/dasdimo/dasdimo.json" };
 	for (let i = 1; i < argv.length; i++) {
 		const key = argv[i];
 		if (key === "--readme") args.readme = true;
 		else if (key === "--dry-run") args.dryRun = true;
 		else if (key === "--suffix") args.suffix = argv[++i] || "";
+		else if (key === "--against") args.against = argv[++i] || "";
 		else if (key === "--config") args.config = argv[++i] || "";
 		else fail("unknown option " + key);
 	}
@@ -335,6 +388,10 @@ function megabytes(bytes) {
 	return (bytes / (1024 * 1024)).toFixed(1);
 }
 
+function sum(files) {
+	return files.reduce((total, file) => total + file.size, 0);
+}
+
 function sha256File(file) {
 	const hash = crypto.createHash("sha256");
 	const fd = fs.openSync(file, "r");
@@ -343,6 +400,10 @@ function sha256File(file) {
 	while ((read = fs.readSync(fd, buffer, 0, buffer.length, null)) > 0) hash.update(buffer.subarray(0, read));
 	fs.closeSync(fd);
 	return hash.digest("hex");
+}
+
+function manifestName(cfg) {
+	return cfg.manifest_name || "manifest.json";
 }
 
 // ---------- config ----------
@@ -368,17 +429,30 @@ function configProblems(cfg) {
 	if (!ID_RE.test(cfg.game_id || "")) problems.push("game_id: lowercase letters, digits, '-' (2-32 chars)");
 	if (typeof cfg.game_name !== "string" || !cfg.game_name.trim()) problems.push("game_name missing");
 	if (!REPO_RE.test(cfg.repo || "")) problems.push("repo must look like dasdimo/<name>-releases");
+	if (cfg.manifest_name !== undefined && !MANIFEST_NAME_RE.test(cfg.manifest_name)) problems.push("manifest_name: a file name like manifest.json");
 	if (!Array.isArray(cfg.files) || !cfg.files.length) problems.push("files missing");
 	else {
 		for (const [i, file] of cfg.files.entries()) {
+			const hasPath = typeof file.path === "string" && file.path !== "";
+			const hasDir = typeof file.dir === "string" && file.dir !== "";
 			if (!ARCHES.includes(file.arch)) problems.push(`files[${i}].arch must be x86_64 or arm64`);
-			if (typeof file.path !== "string" || !file.path) problems.push(`files[${i}].path missing`);
-			else if (file.path.endsWith(".zip") && (!/^[^\\/:.][^:]*\.exe$/.test(file.exe || "") || /(^|[\\/])\.\.([\\/]|$)/.test(file.exe))) {
-				problems.push(`files[${i}].exe: start file inside the zip, relative path like "Game.exe" or "bin/Game.exe"`);
+			if (hasPath === hasDir) problems.push(`files[${i}]: either path (one exe) or dir (build folder) + exe`);
+			else if (hasPath && !file.path.toLowerCase().endsWith(".exe")) {
+				problems.push(`files[${i}].path must end with .exe - for a game made of several files use dir + exe`);
+			} else if (hasDir) {
+				if (typeof file.exe !== "string" || pathProblem(file.exe) || !file.exe.toLowerCase().endsWith(".exe")) {
+					problems.push(`files[${i}].exe: start file inside dir, like "Game.exe" or "bin/Game.exe"`);
+				}
+				if (file.exclude !== undefined && (!Array.isArray(file.exclude) || file.exclude.some((p) => typeof p !== "string" || !p))) {
+					problems.push(`files[${i}].exclude: list of patterns like "*.pdb" or "logs/**"`);
+				}
 			}
 		}
-		if (!cfg.files.some((file) => file.arch === "x86_64")) problems.push("an x86_64 file is required");
-		if (new Set(cfg.files.map((file) => file.arch)).size !== cfg.files.length) problems.push("one file per arch");
+		if (!cfg.files.some((file) => file.arch === "x86_64")) problems.push("an x86_64 build is required");
+		if (new Set(cfg.files.map((file) => file.arch)).size !== cfg.files.length) problems.push("one entry per arch");
+		const dirs = cfg.files.filter((file) => file.dir);
+		if (dirs.length && dirs.length !== cfg.files.length) problems.push("files: all with path or all with dir");
+		if (new Set(dirs.map((file) => String(file.exe).toLowerCase())).size > 1) problems.push("files: the same exe for every arch");
 	}
 	try {
 		const version = readVersion(cfg);
@@ -433,14 +507,154 @@ function readVersion(cfg) {
 	return found[1].trim();
 }
 
-function resolveFiles(cfg, baseVersion) {
-	return cfg.files.map((file) => {
-		const full = rel(file.path.replace(/\{version\}/g, baseVersion));
-		if (!fs.existsSync(full)) fail("build missing: " + path.relative(ROOT, full) + " - build the game first");
-		const name = path.basename(full);
-		if (!NAME_RE.test(name)) fail(`file name '${name}': only letters, digits, . _ - and ending .exe or .zip`);
-		return { arch: file.arch, path: full, name, exe: file.exe || "" };
-	});
+// ---------- game files ----------
+
+// "" for a safe relative path like "Game.exe" or "packs/maps.pck", else a short reason.
+function pathProblem(file) {
+	if (!file) return "empty";
+	if (file.length > MAX_PATH_LENGTH) return `longer than ${MAX_PATH_LENGTH} characters`;
+	const parts = file.split("/");
+	if (parts.length > MAX_DEPTH) return `deeper than ${MAX_DEPTH} folders`;
+	for (const part of parts) {
+		if (!part || part === "." || part === "..") return "bad folder";
+		if (part.startsWith(" ") || part.endsWith(" ") || part.endsWith(".")) return "space or dot at the edge of a name";
+		if (/[<>:"\\|?*\x00-\x1f]/.test(part)) return "character not allowed in Windows";
+		if (RESERVED_RE.test(part.split(".")[0])) return "name reserved by Windows";
+	}
+	return "";
+}
+
+// "" when the paths fit into one folder: no path twice (Windows ignores case), nothing that is a file and a folder.
+function setProblem(paths) {
+	const keys = new Set();
+	for (const file of paths) {
+		if (keys.has(file.toLowerCase())) return `'${file}' twice (case does not count)`;
+		keys.add(file.toLowerCase());
+	}
+	for (const file of paths) {
+		const parts = file.split("/");
+		for (let depth = 1; depth < parts.length; depth++) {
+			const folder = parts.slice(0, depth).join("/");
+			if (keys.has(folder.toLowerCase())) return `'${folder}' is a file and a folder`;
+		}
+	}
+	return "";
+}
+
+// "*.pdb" matches a name anywhere, "logs/**" a path from the build folder; ignores case.
+function excludeRule(pattern) {
+	const source = pattern.replace(/\\/g, "/").split(/(\*\*|\*|\?)/).map((part) => {
+		if (part === "**") return ".*";
+		if (part === "*") return "[^/]*";
+		if (part === "?") return "[^/]";
+		return part.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+	}).join("");
+	return { regex: new RegExp(`^${source}$`, "i"), wholePath: pattern.includes("/") };
+}
+
+// The builds as [{arch, exe, source, files: [{path, full, size}]}]; problems are collected for "check".
+function readBuilds(cfg, baseVersion) {
+	const problems = [];
+	const format = cfg.files.some((entry) => entry.dir) ? 2 : 1;
+	const builds = [];
+	for (const entry of cfg.files) {
+		if (format === 1) {
+			const full = rel(entry.path.replace(/\{version\}/g, baseVersion));
+			const name = path.basename(full);
+			if (!fs.existsSync(full)) problems.push("build missing: " + path.relative(ROOT, full) + " - build the game first");
+			else if (!NAME_RE.test(name)) problems.push(`file name '${name}': only letters, digits, . _ - and ending .exe`);
+			else builds.push({ arch: entry.arch, exe: name, source: full, files: [{ path: name, full, size: fs.statSync(full).size }] });
+			continue;
+		}
+		const source = rel(entry.dir.replace(/\{version\}/g, baseVersion));
+		if (!fs.existsSync(source) || !fs.statSync(source).isDirectory()) {
+			problems.push("build folder missing: " + path.relative(ROOT, source) + " - build the game first");
+			continue;
+		}
+		const rules = (entry.exclude || []).map(excludeRule);
+		const skip = (relative) => rules.some((rule) => rule.regex.test(rule.wholePath ? relative : path.posix.basename(relative)));
+		const files = [];
+		const walk = (folder, prefix) => {
+			const items = fs.readdirSync(folder, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+			for (const item of items) {
+				const relative = prefix + item.name;
+				const full = path.join(folder, item.name);
+				if (skip(relative)) continue;
+				if (item.isSymbolicLink()) problems.push(`${entry.arch} ${relative}: links are not supported`);
+				else if (item.isDirectory()) walk(full, relative + "/");
+				else if (item.isFile()) {
+					const problem = pathProblem(relative);
+					const size = fs.statSync(full).size;
+					if (problem) problems.push(`${entry.arch} ${relative}: ${problem} - rename it or add it to exclude`);
+					else if (!size) problems.push(`${entry.arch} ${relative}: empty file - remove it or add it to exclude`);
+					else files.push({ path: relative, full, size });
+				}
+			}
+		};
+		walk(source, "");
+		const exe = files.find((file) => file.path.toLowerCase() === entry.exe.toLowerCase());
+		if (!exe) problems.push(`${entry.arch}: start file ${entry.exe} not in ${entry.dir}`);
+		const set = setProblem(files.map((file) => file.path));
+		if (set) problems.push(`${entry.arch}: ${set}`);
+		builds.push({ arch: entry.arch, exe: exe ? exe.path : entry.exe, source, files });
+	}
+	return { format, builds, problems };
+}
+
+// Format 2 file list: a file with the same path and content in both builds is listed once as arch "all".
+function gameFiles(builds, hash) {
+	const entries = [];
+	for (const build of builds) {
+		for (const file of build.files) entries.push({ path: file.path, arch: build.arch, size: file.size, sha256: hash(file.full), full: file.full });
+	}
+	if (builds.length > 1) {
+		const same = (file) => `${file.path.toLowerCase()}\n${file.sha256}`;
+		const counts = new Map();
+		for (const file of entries) counts.set(same(file), (counts.get(same(file)) || 0) + 1);
+		const seen = new Set();
+		for (let i = entries.length - 1; i >= 0; i--) {
+			if (counts.get(same(entries[i])) < builds.length) continue;
+			if (seen.has(same(entries[i]))) entries.splice(i, 1);
+			else {
+				seen.add(same(entries[i]));
+				entries[i].arch = "all";
+			}
+		}
+	}
+	return entries.sort((a, b) => (a.path.toLowerCase() < b.path.toLowerCase() ? -1 : a.path.toLowerCase() > b.path.toLowerCase() ? 1
+		: ARCHES.indexOf(a.arch) - ARCHES.indexOf(b.arch)));
+}
+
+// The files a PC gets, like the launcher (core/release_manifest.gd files_for): ARM64 falls back to x86_64.
+function filesFor(manifest, arch) {
+	const files = Array.isArray(manifest.files) ? manifest.files : [];
+	const tries = arch === "arm64" ? ["arm64", "x86_64"] : [arch];
+	if ((manifest.format || 1) < 2) {
+		for (const wanted of tries) {
+			const file = files.find((f) => f.kind === "game" && f.arch === wanted);
+			if (file) return [{ path: file.name, size: file.size, sha256: String(file.sha256).toLowerCase() }];
+		}
+		return [];
+	}
+	const offers = (wanted) => files.some((f) => f.arch === wanted)
+		|| (wanted === "x86_64" && files.length > 0 && files.every((f) => f.arch === "all"));
+	const used = tries.find(offers);
+	if (!used) return [];
+	return files.filter((f) => f.arch === used || f.arch === "all")
+		.map((f) => ({ path: f.path, size: f.size, sha256: String(f.sha256).toLowerCase() }));
+}
+
+// What turns the installed files into the wanted ones (the launcher's GameFiles.diff).
+function diffFiles(installed, wanted) {
+	const have = new Map(installed.map((file) => [file.path.toLowerCase(), file]));
+	const keys = new Set(wanted.map((file) => file.path.toLowerCase()));
+	const download = [];
+	for (const file of wanted) {
+		const old = have.get(file.path.toLowerCase());
+		if (!old || old.sha256 !== file.sha256 || old.size !== file.size) download.push({ ...file, change: old ? "changed" : "new" });
+	}
+	const remove = installed.filter((file) => !keys.has(file.path.toLowerCase())).map((file) => file.path);
+	return { download, remove, downloadBytes: sum(download), totalBytes: sum(wanted) };
 }
 
 // ---------- pictures ----------
@@ -522,48 +736,82 @@ function readNews(cfg, version) {
 
 // ---------- manifest ----------
 
-function buildRelease(cfg, suffix) {
+// Hashes the builds and makes the manifest (nothing written). assets = the release files [{name, full, size, sha256}].
+function makeRelease(cfg, suffix) {
 	const baseVersion = readVersion(cfg);
 	const version = suffix ? `${baseVersion}-${suffix}` : baseVersion;
 	if (!VERSION_RE.test(version)) fail(`invalid version '${version}'`);
 	const tag = "v" + version;
-	const files = resolveFiles(cfg, baseVersion).map((file) => {
-		const entry = {
-			kind: "game",
-			arch: file.arch,
-			name: file.name,
-			size: fs.statSync(file.path).size,
-			sha256: sha256File(file.path),
-			url: `https://github.com/${cfg.repo}/releases/download/${tag}/${file.name}`,
-		};
-		if (file.exe) entry.exe = file.exe;
-		return Object.assign(entry, { path: file.path });
-	});
-	const news = readNews(cfg, version).news;
-	const manifest = {
-		format: files.some((file) => file.name.endsWith(".zip")) ? 2 : 1,
-		game: cfg.game_name,
-		game_id: cfg.game_id,
-		repo: cfg.repo,
-		version,
-		tag,
-		date: today(),
-		launcher_version: "",
-		files: files.map(({ path: _path, ...entry }) => entry),
-		news,
+	const { format, builds, problems } = readBuilds(cfg, baseVersion);
+	const result = { version, tag, format, builds, manifest: null, assets: [], problems };
+	if (problems.length) return result;
+	const hashes = new Map();
+	const hash = (full) => {
+		if (!hashes.has(full)) hashes.set(full, sha256File(full));
+		return hashes.get(full);
 	};
-	const out = rel(path.join(cfg.out_dir, tag));
-	fs.mkdirSync(out, { recursive: true });
-	const manifestPath = path.join(out, "manifest.json");
-	const notesPath = path.join(out, "notes.md");
-	fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, "\t") + "\n", "utf8");
-	fs.writeFileSync(notesPath, releaseNotes(cfg, manifest, Boolean(suffix)), "utf8");
-	for (const file of manifest.files) {
-		console.log(`${file.arch.padEnd(6)} ${megabytes(file.size).padStart(7)} MB  ${file.sha256}  ${file.name}`);
+	const assets = new Map();
+	const addAsset = (name, file) => {
+		const old = assets.get(name.toLowerCase());
+		if (old && old.sha256 !== file.sha256) problems.push(`two different files would be called ${name} on GitHub`);
+		else if (!old) assets.set(name.toLowerCase(), { name, full: file.full, size: file.size, sha256: file.sha256 });
+		return `https://github.com/${cfg.repo}/releases/download/${tag}/${name}`;
+	};
+	let files;
+	if (format === 1) {
+		files = builds.map((build) => {
+			const file = { ...build.files[0], sha256: hash(build.files[0].full) };
+			return { kind: "game", arch: build.arch, name: file.path, size: file.size, sha256: file.sha256, url: addAsset(file.path, file) };
+		});
+	} else {
+		files = gameFiles(builds, hash).map((file) => {
+			const name = file.sha256.slice(0, 12) + "-" + path.posix.basename(file.path).replace(/[^0-9A-Za-z._-]/g, "_");
+			return { path: file.path, arch: file.arch, size: file.size, sha256: file.sha256, url: addAsset(name, file) };
+		});
+		for (const build of builds) {
+			if (!files.some((file) => file.arch === build.arch)) {
+				problems.push(`${build.arch}: no file of its own (usually the exe) - with the same files for both, use only x86_64`);
+			}
+		}
+		if (files.length > MAX_FILES) problems.push(`${files.length} files - the launcher takes at most ${MAX_FILES}`);
 	}
-	console.log("news: " + (news.map((g) => `${g.version} (${g.entries.length})`).join(", ") || "none"));
+	if (assets.size > MAX_ASSETS) problems.push(`${assets.size} release files - at most ${MAX_ASSETS} (GitHub limit 1000): put small files into packs`);
+	const manifest = { format, game: cfg.game_name, game_id: cfg.game_id, repo: cfg.repo, version, tag, date: today(), launcher_version: "" };
+	if (format === 2) manifest.exe = builds[0].exe;
+	manifest.files = files;
+	manifest.news = readNews(cfg, version).news;
+	return Object.assign(result, { manifest, assets: [...assets.values()] });
+}
+
+function printSummary(release) {
+	const files = release.manifest.files;
+	if (release.format === 1 || files.length <= LIST_LINES) {
+		for (const file of files) {
+			console.log(`${file.arch.padEnd(6)} ${megabytes(file.size).padStart(7)} MB  ${file.sha256}  ${file.path || file.name}`);
+		}
+	}
+	if (release.format === 2) {
+		for (const build of release.builds) {
+			const set = filesFor(release.manifest, build.arch);
+			console.log(`${build.arch}: ${set.length} file(s), ${megabytes(sum(set))} MB, start file ${release.manifest.exe}`);
+		}
+		console.log(`${files.filter((file) => file.arch === "all").length} file(s) shared by both builds, ${release.assets.length} release file(s)`);
+	}
+}
+
+function buildRelease(cfg, suffix) {
+	const release = makeRelease(cfg, suffix);
+	if (release.problems.length) fail(release.problems.join("; "));
+	const out = rel(path.join(cfg.out_dir, release.tag));
+	fs.mkdirSync(out, { recursive: true });
+	const manifestPath = path.join(out, manifestName(cfg));
+	const notesPath = path.join(out, "notes.md");
+	fs.writeFileSync(manifestPath, JSON.stringify(release.manifest, null, "\t") + "\n", "utf8");
+	fs.writeFileSync(notesPath, releaseNotes(cfg, release.manifest, Boolean(suffix)), "utf8");
+	printSummary(release);
+	console.log("news: " + (release.manifest.news.map((g) => `${g.version} (${g.entries.length})`).join(", ") || "none"));
 	console.log("written: " + path.relative(ROOT, manifestPath));
-	return { version, tag, manifest, manifestPath, notesPath, assets: files.map((file) => file.path) };
+	return Object.assign(release, { manifestPath, notesPath });
 }
 
 // Games come only through the launcher: the notes link the launcher, not the game files.
@@ -586,8 +834,17 @@ function releaseNotes(cfg, manifest, test) {
 		}
 		lines.push("---", "");
 	}
-	lines.push("| Datei / file | MB | SHA-256 |", "|---|---|---|");
-	for (const file of manifest.files) lines.push(`| ${file.name} | ${megabytes(file.size)} | \`${file.sha256}\` |`);
+	if (manifest.format >= 2) {
+		lines.push("| Build | Dateien / files | MB |", "|---|---|---|");
+		for (const arch of ARCHES) {
+			if (arch === "arm64" && !manifest.files.some((file) => file.arch === "arm64")) continue;
+			const set = filesFor(manifest, arch);
+			lines.push(`| ${arch} | ${set.length} | ${megabytes(sum(set))} |`);
+		}
+	} else {
+		lines.push("| Datei / file | MB | SHA-256 |", "|---|---|---|");
+		for (const file of manifest.files) lines.push(`| ${file.name} | ${megabytes(file.size)} | \`${file.sha256}\` |`);
+	}
 	lines.push("");
 	return lines.join("\n");
 }
@@ -652,9 +909,52 @@ function releaseAssets(repo, tag) {
 	return result.ok ? JSON.parse(result.out).assets || [] : null;
 }
 
-function sameOnGitHub(assets, file) {
-	const asset = assets.find((a) => a.name === path.basename(file));
-	return Boolean(asset) && String(asset.digest || "") === "sha256:" + sha256File(file);
+function sameOnGitHub(assets, name, sha256) {
+	const asset = assets.find((a) => a.name === name);
+	return Boolean(asset) && String(asset.digest || "") === "sha256:" + sha256;
+}
+
+// GitHub names a release file after the local file: format 2 files are linked (or copied) under their release name.
+function stageAssets(release) {
+	if (release.format < 2) return release.assets.map((asset) => ({ ...asset, file: asset.full }));
+	const dir = path.join(path.dirname(release.manifestPath), "files");
+	fs.rmSync(dir, { recursive: true, force: true });
+	fs.mkdirSync(dir, { recursive: true });
+	return release.assets.map((asset) => {
+		const file = path.join(dir, asset.name);
+		try {
+			fs.linkSync(asset.full, file);
+		} catch (error) {
+			fs.copyFileSync(asset.full, file);
+		}
+		return { ...asset, file };
+	});
+}
+
+// The manifest of the latest release ({manifest, label}), or null when there is none yet.
+function latestManifest(cfg, against) {
+	let file = against ? rel(against) : "";
+	let tmp = "";
+	if (!file) {
+		tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dasdimo_diff_"));
+		const result = gh(["release", "download", "-R", cfg.repo, "-p", manifestName(cfg), "-D", tmp], { allowFail: true });
+		if (!result.ok) {
+			fs.rmSync(tmp, { recursive: true, force: true });
+			if (/release not found|no assets match|Not Found|HTTP 404/i.test(result.err)) return null;
+			fail("reading the latest release failed: " + result.err.trim());
+		}
+		file = path.join(tmp, manifestName(cfg));
+	}
+	const text = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+	if (tmp) fs.rmSync(tmp, { recursive: true, force: true });
+	if (!text) fail("manifest not found: " + file);
+	let manifest;
+	try {
+		manifest = JSON.parse(text);
+	} catch (error) {
+		fail(path.basename(file) + " is not valid JSON");
+	}
+	return { manifest, label: `${manifest.tag || manifest.version} (${path.basename(file)}, format ${manifest.format || 1})` };
 }
 
 // ---------- commands ----------
@@ -664,10 +964,13 @@ function commandCheck(cfg) {
 	if (!problems.length) {
 		const baseVersion = readVersion(cfg);
 		console.log(`${cfg.game_name} ${baseVersion} -> ${cfg.repo}`);
-		for (const file of cfg.files) {
-			const full = rel(file.path.replace(/\{version\}/g, baseVersion));
-			console.log(`${fs.existsSync(full) ? "ok     " : "MISSING"} ${file.arch.padEnd(6)} ${path.relative(ROOT, full)}`);
+		const release = makeRelease(cfg, "");
+		for (const build of release.builds) {
+			const details = release.format === 2 ? ` (${build.files.length} file(s), ${megabytes(sum(build.files))} MB, start file ${build.exe})` : "";
+			console.log(`ok      ${build.arch.padEnd(6)} ${path.relative(ROOT, build.source)}${details}`);
 		}
+		if (release.manifest && release.format === 2) console.log(`${release.assets.length} release file(s), same files of both builds only once`);
+		problems.push(...release.problems);
 		const news = readNews(cfg, baseVersion);
 		problems.push(...news.problems);
 		if (!news.news.some((group) => group.version === baseVersion)) problems.push(`news: no entry for ${baseVersion} yet (${cfg.news_file})`);
@@ -677,6 +980,40 @@ function commandCheck(cfg) {
 	for (const problem of problems) console.log("PROBLEM " + problem);
 	console.log(problems.length ? `${problems.length} problem(s)` : "CHECK OK");
 	process.exit(problems.length ? 1 : 0);
+}
+
+// What a player with the latest release loads for this build (the launcher compares path + SHA-256).
+function commandDiff(cfg, args) {
+	const problems = configProblems(cfg);
+	if (problems.length) fail(problems.join("; "));
+	const release = makeRelease(cfg, "");
+	if (release.problems.length) fail(release.problems.join("; "));
+	const old = latestManifest(cfg, args.against);
+	console.log(`${cfg.game_name} ${release.version} compared with ` + (old ? old.label : "nothing (no release yet)"));
+	const exe = (release.manifest.exe || "").toLowerCase();
+	const exeChanged = [];
+	for (const build of release.builds) {
+		const wanted = filesFor(release.manifest, build.arch);
+		const result = diffFiles(old ? filesFor(old.manifest, build.arch) : [], wanted);
+		const less = old && result.totalBytes ? ` - ${Math.round(100 * (1 - result.downloadBytes / result.totalBytes))}% less than the whole game` : "";
+		console.log(`${build.arch}: players load ${result.download.length} of ${wanted.length} file(s), `
+			+ `${megabytes(result.downloadBytes)} of ${megabytes(result.totalBytes)} MB${less}`);
+		const lines = [...result.download.map((file) => `  ${file.change.padEnd(8)} ${megabytes(file.size).padStart(7)} MB  ${file.path}`),
+			...result.remove.map((file) => `  removed  ${file}`)];
+		for (const line of lines.slice(0, LIST_LINES)) console.log(line);
+		if (lines.length > LIST_LINES) console.log(`  ... and ${lines.length - LIST_LINES} more`);
+		const startFile = result.download.find((file) => file.path.toLowerCase() === exe);
+		if (startFile) exeChanged.push(`${build.arch} ${megabytes(startFile.size)} MB`);
+	}
+	if (!cfg.files.some((entry) => entry.arch === "arm64")) console.log("arm64: uses the x86_64 build (emulated)");
+	if (release.format === 1) {
+		console.log("note: one exe per build - every update loads the whole game. A build folder (dir + exe) loads only changed files (INTEGRATION.md).");
+	} else if (old && (old.manifest.format || 1) < 2) {
+		console.log("note: first release made of several files - players load the whole game once, after that only changed files.");
+	} else if (old && exeChanged.length) {
+		console.log(`WARNING: the start file ${release.manifest.exe} changed (${exeChanged.join(", ")}): every player loads it again.`
+			+ " Normal after an engine update - otherwise keep the exe the same (INTEGRATION.md, \"Spiel aus mehreren Dateien\").");
+	}
 }
 
 function commandRelease(cfg, args) {
@@ -694,25 +1031,40 @@ function commandRelease(cfg, args) {
 		putFile(cfg.repo, "README.md", fs.readFileSync(readme), "Download-Anleitung aktualisiert", who);
 	}
 	const title = `${cfg.game_name} ${release.version}` + (args.suffix ? " (Test)" : "");
-	const existing = releaseAssets(cfg.repo, release.tag);
+	const uploads = stageAssets(release);
+	let existing = releaseAssets(cfg.repo, release.tag);
 	if (existing) {
 		console.log(`== update release ${release.tag} ==`);
-		const changed = release.assets.filter((file) => !sameOnGitHub(existing, file));
-		for (const file of release.assets) if (!changed.includes(file)) console.log("unchanged: " + path.basename(file));
-		// Builds first, manifest last: the launcher never sees a manifest whose files are missing.
-		if (changed.length) gh(["release", "upload", release.tag, ...changed, "-R", cfg.repo, "--clobber"], { inherit: true });
-		gh(["release", "upload", release.tag, release.manifestPath, "-R", cfg.repo, "--clobber"], { inherit: true });
-		gh(["release", "edit", release.tag, "-R", cfg.repo, "--title", title, "--notes-file", release.notesPath, "--latest"]);
 	} else {
+		// Not "latest" until every file is up: until then the launcher keeps reading the previous release.
 		console.log(`== create release ${release.tag} ==`);
-		gh(["release", "create", release.tag, ...release.assets, release.manifestPath, "-R", cfg.repo,
-			"--title", title, "--notes-file", release.notesPath, "--latest"], { inherit: true });
+		gh(["release", "create", release.tag, "-R", cfg.repo, "--title", title, "--notes-file", release.notesPath, "--latest=false"]);
+		existing = [];
 	}
+	const changed = uploads.filter((asset) => !sameOnGitHub(existing, asset.name, asset.sha256));
+	console.log(`${uploads.length - changed.length} file(s) already on GitHub, uploading ${changed.length} (${megabytes(sum(changed))} MB)`);
+	// Game files first, manifest last: the launcher never sees a manifest whose files are missing.
+	for (let i = 0; i < changed.length; i += UPLOAD_BATCH) {
+		gh(["release", "upload", release.tag, ...changed.slice(i, i + UPLOAD_BATCH).map((asset) => asset.file), "-R", cfg.repo, "--clobber"], { inherit: true });
+	}
+	gh(["release", "upload", release.tag, release.manifestPath, "-R", cfg.repo, "--clobber"], { inherit: true });
+	gh(["release", "edit", release.tag, "-R", cfg.repo, "--title", title, "--notes-file", release.notesPath, "--latest"]);
 	const remote = releaseAssets(cfg.repo, release.tag) || [];
-	const missing = [...release.assets, release.manifestPath].filter((file) => !sameOnGitHub(remote, file));
-	if (missing.length) fail("missing or different on GitHub: " + missing.map((file) => path.basename(file)).join(", "));
+	const wanted = [...uploads, { name: manifestName(cfg), sha256: sha256File(release.manifestPath) }];
+	const missing = wanted.filter((asset) => !sameOnGitHub(remote, asset.name, asset.sha256));
+	if (missing.length) fail("missing or different on GitHub: " + missing.map((asset) => asset.name).join(", "));
+	if (release.format === 2) {
+		// Files of an earlier upload of this release that the manifest no longer names.
+		const names = new Set(uploads.map((asset) => asset.name));
+		for (const asset of remote) {
+			if (!ASSET_RE.test(asset.name) || names.has(asset.name)) continue;
+			gh(["release", "delete-asset", release.tag, asset.name, "-R", cfg.repo, "--yes"]);
+			console.log("removed unused: " + asset.name);
+		}
+		fs.rmSync(path.join(path.dirname(release.manifestPath), "files"), { recursive: true, force: true });
+	}
 	console.log(`RELEASE OK: https://github.com/${cfg.repo}/releases/tag/${release.tag}`);
-	console.log(`manifest:   https://github.com/${cfg.repo}/releases/latest/download/manifest.json`);
+	console.log(`manifest:   https://github.com/${cfg.repo}/releases/latest/download/${manifestName(cfg)}`);
 }
 
 function commandRegister(cfg, args) {
@@ -732,7 +1084,7 @@ function commandRegister(cfg, args) {
 		type: "game",
 		name: cfg.game_name,
 		repo: cfg.repo,
-		manifest_url: `https://github.com/${cfg.repo}/releases/latest/download/manifest.json`,
+		manifest_url: `https://github.com/${cfg.repo}/releases/latest/download/${manifestName(cfg)}`,
 		platforms: cfg.files.map((file) => file.arch),
 		engine: c.engine.trim(),
 		status: c.status,
@@ -791,13 +1143,14 @@ function commandRegister(cfg, args) {
 
 function main() {
 	const args = parseArgs(process.argv.slice(2));
-	if (!["check", "manifest", "release", "register"].includes(args.command)) {
-		console.log("usage: node tools/dasdimo/dasdimo_release.js check | manifest [--suffix x] | release [--suffix x] [--readme] | register [--dry-run]");
+	if (!["check", "diff", "manifest", "release", "register"].includes(args.command)) {
+		console.log("usage: node tools/dasdimo/dasdimo_release.js check | diff [--against <manifest>] | manifest [--suffix x] | release [--suffix x] [--readme] | register [--dry-run]");
 		console.log("helper version " + HELPER_VERSION);
 		process.exit(args.command === "help" ? 0 : 1);
 	}
 	const cfg = loadConfig(args.config);
 	if (args.command === "check") return commandCheck(cfg);
+	if (args.command === "diff") return commandDiff(cfg, args);
 	if (args.command === "manifest") {
 		const problems = configProblems(cfg);
 		if (problems.length) fail(problems.join("; "));
