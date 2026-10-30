@@ -21,11 +21,12 @@ Updates holt sich der Launcher selbst: Gibt es eine neue Version eines Spiels, s
 ## Gut zu wissen
 - **Wo liegt alles?** Launcher und Spiele in `%LOCALAPPDATA%\DasDimo-Launcher`. Einstellungen und Spielstände der Spiele bleiben in ihren eigenen Ordnern.
 - **Du hattest den RIFTWAKE-Launcher?** Dein installiertes RIFTWAKE und deine Einstellungen werden automatisch übernommen.
+- **Minecraft-Mods:** Links unter „Mods“ stehen DasDimos Minecraft-Mods. Der Launcher legt die Mod in dein Minecraft-Profil (Minecraft Launcher, Modrinth App, NoRisk, CurseForge oder Prism), zeigt, was du dafür noch brauchst, und hält sie aktuell. Minecraft startest du wie gewohnt.
 - **Deinstallieren:** in den Einstellungen des Launchers (Zahnrad oben rechts) oder unter Windows **Einstellungen → Apps**. Dabei werden auch alle Spiele gelöscht; ihre Einstellungen und Spielstände bleiben, außer du wählst es anders.
 - **Etwas geht nicht?** Schick DasDimo die Datei `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\launcher.log`.
 - Der Quellcode ist nicht öffentlich. Hier liegen nur die fertigen Versionen und die Spieleliste (`games.json`).
 
-Für die Claude-Agenten neuer Spiele: [INTEGRATION.md](INTEGRATION.md) erklärt, wie ein Spiel in den Launcher kommt.
+Für die Claude-Agenten neuer Spiele und Mods: [INTEGRATION.md](INTEGRATION.md) erklärt, wie ein Spiel oder eine Minecraft-Mod in den Launcher kommt.
 
 ---
 
@@ -51,8 +52,9 @@ The launcher fetches updates by itself: when a game has a new version, the butto
 ## Good to know
 - **Where is everything?** Launcher and games in `%LOCALAPPDATA%\DasDimo-Launcher`. Settings and saves of the games stay in their own folders.
 - **You had the RIFTWAKE launcher?** Your installed RIFTWAKE and your settings are taken over automatically.
+- **Minecraft mods:** DasDimo's Minecraft mods are listed on the left under “Mods”. The launcher puts a mod into your Minecraft profile (Minecraft Launcher, Modrinth App, NoRisk, CurseForge or Prism), shows what else you need for it and keeps it up to date. You start Minecraft as usual.
 - **Uninstall:** in the launcher's settings (gear at the top right) or in Windows **Settings → Apps**. This also deletes all games; their settings and saves stay unless you choose otherwise.
 - **Something does not work?** Send DasDimo the file `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\launcher.log`.
 - The source code is not public. This repository only holds the finished versions and the game list (`games.json`).
 
-For the Claude agents of new games: [INTEGRATION.md](INTEGRATION.md) explains how a game gets into the launcher.
+For the Claude agents of new games and mods: [INTEGRATION.md](INTEGRATION.md) explains how a game or a Minecraft mod gets into the launcher.
