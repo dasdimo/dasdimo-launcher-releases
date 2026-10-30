@@ -1,6 +1,6 @@
 {
 	"format": 1,
-	"updated": "2026-10-29",
+	"updated": "2026-10-30",
 	"games": [
 		{
 			"id": "riftwake",
@@ -63,6 +63,48 @@
 			"order": 10,
 			"added": "2026-10-29",
 			"updated": "2026-10-29"
+		},
+		{
+			"id": "sayitjapanese",
+			"type": "minecraft_mod",
+			"name": "Say It In Japanese",
+			"repo": "dasdimo/sayitjapanese-releases",
+			"manifest_url": "https://github.com/dasdimo/sayitjapanese-releases/releases/latest/download/manifest.json",
+			"platforms": [
+				"x86_64",
+				"arm64"
+			],
+			"status": "testing",
+			"tagline": {
+				"de": "Sag jedes neue Item laut auf Japanisch – sonst ist es weg.",
+				"en": "Say every new item out loud in Japanese – or it's gone."
+			},
+			"accent": "#FFD000",
+			"icon_url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/icon.png",
+			"icon_sha256": "ae777af53fd89cf0417c950d40d704cb8ee4523b4c771bade05095df9d75307c",
+			"cover_url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/cover.jpg",
+			"cover_sha256": "6767b21e753ff3edbe1271bb1ec93b35148d31720e622aab82ea391f913b838d",
+			"screenshots": [
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/shot1.jpg",
+					"sha256": "f5bcff1cdb34886afee277325d802728114af41432537b1b4e1a51944da7dc45"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/shot2.jpg",
+					"sha256": "a8b683f88b54440dc2d721d33b26d32dfb91b303e0db2c3a516b7c1270a6b1ef"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/shot3.jpg",
+					"sha256": "120c9fafd2f9909ad0fd9884a52aafd2215a72679aa219921ccaed7bc7f7d41b"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/shot4.jpg",
+					"sha256": "714abcf1475e683502e250b6b506dc1f199c5301b5f2637576f5a2b39983507d"
+				}
+			],
+			"order": 20,
+			"added": "2026-10-30",
+			"updated": "2026-10-30"
 		}
 	]
 }
