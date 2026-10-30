@@ -1,7 +1,8 @@
 # Ein Spiel oder eine Minecraft-Mod in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels oder einer Minecraft-Mod von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 5 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 5 (Anhang).
+**Version der Anleitung:** 6 (2026-10-30) · Hilfs-Skript `dasdimo_release.js` Version 5 (Anhang).
+**Neu in Version 6:** **Neues Aussehen** (DasDimo Launcher ab 2.0.0): Das Cover füllt das ganze Fenster, das Logo steht groß über dem Knopf, die Neuigkeiten erscheinen als Karten unter dem Knopf. Die Hinweise zu `cover.jpg` und `logo.png` (Schritt 6) sind angepasst – ein Logo lohnt sich jetzt. Am Skript ändert sich nichts.
 **Neu in Version 5:** **Minecraft-Mods** (DasDimo Launcher ab 1.4.0): Eine Mod bekommt im Launcher eine eigene Seite, ein Klick legt die `.jar` in ein Minecraft-Profil, und die Seite zeigt, was man sonst noch braucht. Alles dazu im Teil „Minecraft-Mods“ (nach Schritt 13). Für Spiele ändert sich nichts – das Skript aus dem Anhang übernehmen genügt.
 **Neu in Version 4:** **Discord-Beitrag pro Version:** Nach `release` legt das Skript im Discord-Patch-Forum deines Spiels von selbst einen neuen Beitrag mit den deutschen Neuigkeiten und Bildern an – sobald der Benutzer für dein Spiel einen Webhook eingerichtet hat. Neuer Befehl `discord` (Abschnitt „Discord-Beitrag“ in Schritt 10). Schon eingerichtet? Skript aus dem Anhang übernehmen, sonst ändert sich nichts.
 **Neu in Version 3:** Spiele aus **mehreren Dateien** (Build-Ordner, Manifest-Format 2): Bei einem Update lädt der Launcher nur die geänderten Dateien statt des ganzen Spiels (DasDimo Launcher ab 1.1.0). Neuer Befehl `diff` (zeigt vor dem Release, wie viel die Spieler laden), Feld `manifest_name`, die `.zip`-Variante entfällt. Schon eingerichtet? Skript aus dem Anhang übernehmen – mit `path` (eine exe) läuft alles weiter wie bisher; zum Umstieg siehe „Spiel aus mehreren Dateien“ (nur nach Rücksprache mit dem Benutzer).
@@ -149,8 +150,8 @@ Lege sie unter `tools/dasdimo/art/` ab (sie gehören ins Git deines Spiels):
 | Datei | Format | Größe | Höchstens | Wofür |
 |---|---|---|---|---|
 | `icon.png` | PNG | **genau 256×256** | 300 KB | Spieleliste links (wird bis 32 px verkleinert): ein klares Motiv, kein kleiner Text, Hintergrund darf transparent sein |
-| `cover.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | 800 KB | großes Bild der Spielseite. **Kein Text im Bild** (Name/Logo zeichnet der Launcher). Unten links liegen Titel und Knopf, rechts die Neuigkeiten – das Hauptmotiv in die Mitte/oben |
-| `logo.png` (optional) | PNG, transparent | höchstens 1200×400 | 300 KB | Schriftzug statt Textnamen |
+| `cover.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | 800 KB | Hintergrund der ganzen Spielseite (Launcher 2.0). **Kein Text im Bild** (Name/Logo zeichnet der Launcher). Links und unten wird es dunkel verlaufen, dort liegen Logo, Knopf und Neuigkeiten; oben ein schmaler Streifen für die Titelleiste – das Hauptmotiv in die **Mitte/rechts** |
+| `logo.png` (optional, empfohlen) | PNG, transparent | höchstens 1200×400 | 300 KB | Schriftzug statt Textnamen, groß über dem Knopf (höchstens 460×150 Pixel angezeigt). Hell auf transparentem Grund – er liegt auf dem dunklen Teil des Covers; ohne Logo steht der Name in großer Schrift da |
 | `shot1.jpg` … `shot8.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | je 800 KB | Screenshot-Reihe der Spielseite (klein, ein Klick öffnet die Großansicht mit Pfeilen). 3–5 starke Momente aus echtem Spielen, verschiedene Orte/Situationen, kein Text, keine Menüs |
 
 Herkunft: echte Szenen aus dem Spiel (Screenshot-Funktion der Engine in voller Auflösung, gute Kamera) und das vorhandene Spiel-Icon. Keine Klötzchen-Platzhalter. **Zeig die Bilder dem Benutzer** (Datei schicken) und warte auf sein OK. Externe Bilder nur mit passender Lizenz und Eintrag in den Credits deines Spiels.
@@ -300,7 +301,7 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 Ab **DasDimo Launcher 1.4.0** stehen auch die Minecraft-Mods des Benutzers im Launcher: links unter „Mods“, mit eigener Seite. Die Schritte 1–13 gelten auch für eine Mod – mit den Unterschieden in diesem Teil. Am Launcher änderst du nichts, alles kommt aus deiner Konfiguration.
 
 **So sieht es im Launcher aus:**
-- **Mod-Seite:** Cover, Name mit dem Abzeichen „Mod“, Untertitel, Chips (Minecraft-Version, Loader + Mindestversion, Java, Client/Server), ein Knopf, darunter „Was du brauchst“, aufklappbare Abschnitte (Erste Schritte, Befehle …), Screenshots und rechts die Neuigkeiten.
+- **Mod-Seite:** Cover als Hintergrund, Logo oder Name mit dem Abzeichen „Mod“, Untertitel, Chips (Minecraft-Version, Loader + Mindestversion, Java, Client/Server), ein Knopf, darunter „Was du brauchst“, die „Anleitung“ (aufklappbare Abschnitte: Erste Schritte, Befehle …), die Neuigkeiten als Karten und die Screenshots.
 - **Installieren:** Beim ersten Klick fragt der Launcher „Wohin installieren?“. Er findet die Profile auf dem PC (Minecraft Launcher, Modrinth App, NoRisk, CurseForge, Prism) – passende (gleiche Minecraft-Version und gleicher Loader) stehen oben. Oder ein Ordner von Hand, oder „Nur Datei herunterladen …“ (die geprüfte `.jar` irgendwohin speichern). Die Wahl merkt er sich pro Mod.
 - **Alte Datei derselben Mod** im Mods-Ordner (gleiche `id` in `fabric.mod.json`, z. B. eine von Hand kopierte ältere Version): Der Launcher fragt und benennt sie in `.jar.disabled` um. Fremde Dateien löscht er nie; „Entfernen …“ löscht nur seine eigene `.jar`, und nur wenn die SHA-256 passt.
 - **Updates** prüft er wie bei Spielen (beim Start und alle 30 Minuten). Ein Update ersetzt nur seine eigene Datei im gewählten Profil.
