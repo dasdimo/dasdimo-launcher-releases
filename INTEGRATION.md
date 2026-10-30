@@ -1,14 +1,15 @@
-# Ein Spiel in den DasDimo Launcher bringen
+# Ein Spiel oder eine Minecraft-Mod in den DasDimo Launcher bringen
 
-**Für:** den Claude-Agenten eines Spiels von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 4 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 4 (Anhang).
+**Für:** den Claude-Agenten eines Spiels oder einer Minecraft-Mod von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
+**Version der Anleitung:** 5 (2026-10-29) · Hilfs-Skript `dasdimo_release.js` Version 5 (Anhang).
+**Neu in Version 5:** **Minecraft-Mods** (DasDimo Launcher ab 1.4.0): Eine Mod bekommt im Launcher eine eigene Seite, ein Klick legt die `.jar` in ein Minecraft-Profil, und die Seite zeigt, was man sonst noch braucht. Alles dazu im Teil „Minecraft-Mods“ (nach Schritt 13). Für Spiele ändert sich nichts – das Skript aus dem Anhang übernehmen genügt.
 **Neu in Version 4:** **Discord-Beitrag pro Version:** Nach `release` legt das Skript im Discord-Patch-Forum deines Spiels von selbst einen neuen Beitrag mit den deutschen Neuigkeiten und Bildern an – sobald der Benutzer für dein Spiel einen Webhook eingerichtet hat. Neuer Befehl `discord` (Abschnitt „Discord-Beitrag“ in Schritt 10). Schon eingerichtet? Skript aus dem Anhang übernehmen, sonst ändert sich nichts.
 **Neu in Version 3:** Spiele aus **mehreren Dateien** (Build-Ordner, Manifest-Format 2): Bei einem Update lädt der Launcher nur die geänderten Dateien statt des ganzen Spiels (DasDimo Launcher ab 1.1.0). Neuer Befehl `diff` (zeigt vor dem Release, wie viel die Spieler laden), Feld `manifest_name`, die `.zip`-Variante entfällt. Schon eingerichtet? Skript aus dem Anhang übernehmen – mit `path` (eine exe) läuft alles weiter wie bisher; zum Umstieg siehe „Spiel aus mehreren Dateien“ (nur nach Rücksprache mit dem Benutzer).
 **Neu in Version 2:** Screenshots (`catalog.screenshots`), Eintrag mit `"type": "game"`, Spiele nur über den Launcher, Test mit dem Launcher (Schritt 11).
 **Öffentliche Adresse:** https://github.com/dasdimo/dasdimo-launcher-releases/blob/main/INTEGRATION.md
 Zum Lesen in Claude Code: `gh api repos/dasdimo/dasdimo-launcher-releases/contents/INTEGRATION.md -H "Accept: application/vnd.github.raw"`
 
-Lies diese Datei ganz, bevor du anfängst. Arbeite die Schritte der Reihe nach ab und hake sie in deiner Aufgabenliste ab.
+Lies diese Datei ganz, bevor du anfängst. Arbeite die Schritte der Reihe nach ab und hake sie in deiner Aufgabenliste ab. **Eine Minecraft-Mod?** Lies zuerst den Teil „Minecraft-Mods“ weiter unten – er sagt, was bei den Schritten 1–13 anders ist.
 
 ---
 
@@ -194,7 +195,7 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 | `files[].url` | voller Link zur Datei im Release (`https://github.com/dasdimo/…`). Format 2: Name im Release = die ersten 12 Zeichen der SHA-256 + Dateiname, weil GitHub keine Ordner kennt und beide Plattformen eine `Beispielspiel.exe` haben |
 | `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN |
 | `launcher_version` | bei Spielen immer `""` |
-| `min_launcher` | optional: die älteste DasDimo-Launcher-Version, mit der diese Spielversion installiert und gespielt werden darf, z. B. `"1.1.0"` (wie `version`, ohne `v`). Ist der Launcher älter, sperrt er „Aktualisieren“ und „Spielen“ (auch die installierte Version) und zeigt „Launcher aktualisieren“; ohne Internet bleibt die installierte Version spielbar. Gilt ab Launcher 1.1.1, ältere ignorieren das Feld. Nur setzen, wenn das Spiel wirklich einen neueren Launcher braucht. Das Hilfs-Skript v3 schreibt es noch nicht – bei Bedarf beim Benutzer melden |
+| `min_launcher` | optional: die älteste DasDimo-Launcher-Version, mit der diese Spielversion installiert und gespielt werden darf, z. B. `"1.1.0"` (wie `version`, ohne `v`). Ist der Launcher älter, sperrt er „Aktualisieren“ und „Spielen“ (auch die installierte Version) und zeigt „Launcher aktualisieren“; ohne Internet bleibt die installierte Version spielbar. Gilt ab Launcher 1.1.1, ältere ignorieren das Feld. Nur setzen, wenn das Spiel wirklich einen neueren Launcher braucht. Das Hilfs-Skript schreibt es bei Spielen nicht – bei Bedarf beim Benutzer melden (bei Mods immer `1.4.0`) |
 
 ## Schritt 8 – Neuigkeiten und README
 **`tools/dasdimo/news.json`** – alle Versionen, neueste zuerst. Das Skript nimmt die letzten 3 (Versionen mit `-`, z. B. `0.3.0-dev2`, werden ausgelassen, außer es ist die gerade veröffentlichte). Mehrere Blöcke mit gleicher Version werden zusammengefasst.
@@ -295,6 +296,176 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 2. Committe `tools/dasdimo/` (Skript, Konfiguration, Neuigkeiten, README, Bilder) im Repo deines Spiels, mit verständlicher deutscher Commit-Nachricht.
 3. Bericht an den Benutzer auf Deutsch: Link zum Release-Repo, Link zum Discord-Beitrag (falls gepostet), Ergebnis des Launcher-Tests, bei Format 2 die MB eines normalen Updates (aus `diff`), was noch offen ist, und eine kurze Nachricht für die Freunde („Neues Spiel im DasDimo Launcher: einfach den Launcher öffnen“).
 
+## Minecraft-Mods
+Ab **DasDimo Launcher 1.4.0** stehen auch die Minecraft-Mods des Benutzers im Launcher: links unter „Mods“, mit eigener Seite. Die Schritte 1–13 gelten auch für eine Mod – mit den Unterschieden in diesem Teil. Am Launcher änderst du nichts, alles kommt aus deiner Konfiguration.
+
+**So sieht es im Launcher aus:**
+- **Mod-Seite:** Cover, Name mit dem Abzeichen „Mod“, Untertitel, Chips (Minecraft-Version, Loader + Mindestversion, Java, Client/Server), ein Knopf, darunter „Was du brauchst“, aufklappbare Abschnitte (Erste Schritte, Befehle …), Screenshots und rechts die Neuigkeiten.
+- **Installieren:** Beim ersten Klick fragt der Launcher „Wohin installieren?“. Er findet die Profile auf dem PC (Minecraft Launcher, Modrinth App, NoRisk, CurseForge, Prism) – passende (gleiche Minecraft-Version und gleicher Loader) stehen oben. Oder ein Ordner von Hand, oder „Nur Datei herunterladen …“ (die geprüfte `.jar` irgendwohin speichern). Die Wahl merkt er sich pro Mod.
+- **Alte Datei derselben Mod** im Mods-Ordner (gleiche `id` in `fabric.mod.json`, z. B. eine von Hand kopierte ältere Version): Der Launcher fragt und benennt sie in `.jar.disabled` um. Fremde Dateien löscht er nie; „Entfernen …“ löscht nur seine eigene `.jar`, und nur wenn die SHA-256 passt.
+- **Updates** prüft er wie bei Spielen (beim Start und alle 30 Minuten). Ein Update ersetzt nur seine eigene Datei im gewählten Profil.
+- **„Was du brauchst“** prüft das gewählte Profil: ✓ gefunden, ⚠ zu alt, ✗ fehlt (mit „Seite öffnen“), ☆ empfohlen, ⚙ Zusatz-Programm (aufklappbar mit den Schritten). Andere Mods erkennt er an der `id` in ihren `.jar`, Minecraft- und Loader-Version an der letzten Startzeile im Log des Profils.
+- Launcher bis 1.3.x zeigen Mods nicht – sie überspringen den Eintrag leise.
+
+### Unterschiede Schritt für Schritt
+**Schritt 1 – Grunddaten:** Keine Frage nach ARM64 (eine `.jar` läuft überall) und kein „Build-Ordner oder eine exe“. Dafür klärst du:
+
+| Was | Regel | Beispiel |
+|---|---|---|
+| `game_id` | wie bei Spielen; Name des Release-Repos | `beispielmod` |
+| `mod_id` | die `id` aus deiner `fabric.mod.json` – nur angeben, wenn sie anders ist als `game_id` | `beispielmod` |
+| Minecraft / Loader / Java | wie in `fabric.mod.json` (`depends`) | 26.3 / Fabric ab 0.20.1 / 25 |
+| Client / Server | `client`, `server` oder `both` (Mod gehört auf beide) | `both` |
+| Was die Mod braucht | Pflicht-Mods (Mod-ID, Mindestversion, Link), empfohlene Mods (was man ohne verpasst), Programme außerhalb von Minecraft (Schritte zum Einrichten) | Fabric API ab 0.165.0+26.3 |
+| Wichtiger Hinweis | höchstens 3 Sätze, die man nicht übersehen darf | „Ohne Spracherkennung werden neue Items gelöscht.“ |
+
+**Schritt 2 – Mod vorbereiten:**
+- Gebaut wird wie immer (`gradlew build`). Die fertige Datei liegt in `build/libs/` – die **ohne** `-sources` oder `-dev` im Namen.
+- **Fabric/Quilt:** In der `.jar` liegt `fabric.mod.json` (bzw. `quilt.mod.json`) mit `id` und `version`; `version` = Release-Version (z. B. `${version}` aus `gradle.properties`). Daran erkennt der Launcher alte Dateien deiner Mod. Forge/NeoForge geht auch, dann kann der Launcher alte Dateien und andere Mods im Profil aber nicht erkennen.
+- **Dateiname:** nur `A–Z a–z 0–9 . + _ -`, endet auf `.jar`, höchstens 128 Zeichen. Die Version darf im Namen stehen (`beispielmod-0.2.0.jar`) – bei einem Update tauscht der Launcher seine eigene alte Datei aus.
+- **Lizenzen:** Eingebaute Bibliotheken brauchen ihren Lizenzhinweis (in der `.jar` und in der README), das Projekt eine `LICENSE`-Datei. Vor dem ersten Release mit dem Benutzer klären.
+- Eine Mod hat **keine** `user_data_dirs`: Ihre Einstellungen liegen im Minecraft-Profil (`config/`) und gehören dem Spieler.
+
+**Schritt 3 – Release-Repo:** wie bei Spielen, Beschreibung z. B. `"<Name> – Minecraft-Mod (fertige .jar) / Minecraft mod downloads"`.
+
+**Schritt 4** entfällt.
+
+**Schritt 5 – Konfiguration:** `"type": "minecraft_mod"`; `files` nennt die `.jar`; `mod` enthält die Texte der Mod-Seite. Beispiel:
+
+```json
+{
+	"type": "minecraft_mod",
+	"game_id": "beispielmod",
+	"game_name": "Beispielmod",
+	"repo": "dasdimo/beispielmod-releases",
+	"version_file": "gradle.properties",
+	"version_pattern": "^mod_version\\s*=\\s*(\\S+)",
+	"files": [{"jar": "build/libs/beispielmod-{version}.jar", "loader": "fabric"}],
+	"news_file": "tools/dasdimo/news.json",
+	"readme_file": "tools/dasdimo/README.md",
+	"mod": {
+		"mod_id": "beispielmod",
+		"minecraft": {"version": "26.3", "loader": "fabric", "loader_version": "0.20.1", "java": "25", "side": "both"},
+		"important": [
+			{"de": "Ohne Spracherkennung schlägt jeder Versuch fehl – neue Items werden gelöscht.", "en": "Without speech recognition every try fails – new items get deleted."}
+		],
+		"requires": [
+			{"type": "loader", "name": "Fabric Loader", "min_version": "0.20.1", "url": "https://fabricmc.net/use/installer/",
+				"steps": [{"de": "Fabric-Installer starten, Minecraft 26.3 und Loader 0.20.1 wählen.", "en": "Run the Fabric installer, pick Minecraft 26.3 and loader 0.20.1."}]},
+			{"type": "mod", "name": "Fabric API", "mod_id": "fabric-api", "min_version": "0.165.0+26.3", "url": "https://modrinth.com/mod/fabric-api",
+				"why": {"de": "Schnittstellen für Anzeige, Befehle und Netzwerk.", "en": "Hooks for the display, commands and networking."}},
+			{"type": "mod", "name": "Simple Voice Chat", "mod_id": "voicechat", "optional": true, "url": "https://modrinth.com/plugin/simple-voice-chat",
+				"why": {"de": "Nutzt das Mikrofon des Voice Chats.", "en": "Uses the voice chat's microphone."},
+				"without": {"de": "Die Mod nimmt dann selbst auf – geht genauso.", "en": "The mod records by itself – works just as well."}},
+			{"type": "program", "name": {"de": "whisper.cpp + Sprachmodell", "en": "whisper.cpp + speech model"}, "size": "0,5–1,6 GB",
+				"url": "https://github.com/ggml-org/whisper.cpp/releases",
+				"why": {"de": "Erkennt, was du sagst – lokal und kostenlos.", "en": "Recognises what you say – locally and for free."},
+				"links": [{"label": {"de": "Sprachmodell", "en": "Speech model"}, "url": "https://huggingface.co/ggerganov/whisper.cpp"}],
+				"steps": [
+					{"de": "Zip laden und nach C:\\whisper entpacken, das Modell nach C:\\whisper\\models legen.", "en": "Extract the zip to C:\\whisper, put the model into C:\\whisper\\models."},
+					{"de": "Starten und das Fenster beim Spielen offen lassen:", "en": "Run it and keep the window open while playing:", "code": "whisper-server.exe -m models\\ggml-small.bin --port 8080"}
+				],
+				"check": {"de": "Im Spiel /beispielmod mictest ausführen.", "en": "Run /beispielmod mictest in game."},
+				"alternative": {"de": "Oder ein OpenAI-Schlüssel in der Einstellungsdatei der Mod (kostet Geld).", "en": "Or an OpenAI key in the mod's settings file (costs money)."}}
+		],
+		"sections": [
+			{"id": "first_steps", "items": [{"de": "Mikrofon und Erkennung prüfen:", "en": "Check microphone and recognition:", "code": "/beispielmod mictest"}]},
+			{"id": "commands", "items": [{"de": "Deine Statistik", "en": "Your statistics", "code": "/beispielmod stats"}]},
+			{"id": "known_issues", "items": [{"de": "Profile mit Loader 0.19.x: im Profil auf 0.20.1 umstellen.", "en": "Profiles with loader 0.19.x: switch the profile to 0.20.1."}]}
+		],
+		"guide_url": "https://github.com/dasdimo/beispielmod-releases#readme"
+	},
+	"catalog": {
+		"tagline": {"de": "Sag jedes neue Item laut auf Japanisch – sonst ist es weg.", "en": "Say every new item out loud in Japanese – or it's gone."},
+		"accent": "#FFD000",
+		"status": "testing",
+		"icon": "tools/dasdimo/art/icon.png",
+		"cover": "tools/dasdimo/art/cover.jpg",
+		"screenshots": ["tools/dasdimo/art/shot1.jpg", "tools/dasdimo/art/shot2.jpg", "tools/dasdimo/art/shot3.jpg"]
+	}
+}
+```
+
+| Feld | Regel |
+|---|---|
+| `type` | `"minecraft_mod"` (bei Spielen weglassen oder `"game"`) |
+| `files` | eine Zeile pro Loader (`fabric`, `quilt`, `forge`, `neoforge`), höchstens 4: `jar` = Pfad zur fertigen `.jar` (darf `{version}` enthalten), `loader`. Kein `arch`, `dir`, `exe` oder `path` – eine `.jar` ist auf jedem PC gleich |
+| `mod.mod_id` | die `id` aus `fabric.mod.json`, Standard = `game_id`. `check` vergleicht sie mit der `.jar` |
+| `mod.minecraft` | `version` (Pflicht, z. B. `26.3`), `loader` (Pflicht, wie in `files`), `loader_version` (Mindestversion des Loaders), `java` (nur die Zahl), `side` (`client`, `server`, `both`). Daraus werden die Chips, und passende Profile stehen oben |
+| `mod.important` | 0–3 Sätze, gelber Kasten oben in „Was du brauchst“. Nur für Dinge, die wirklich schiefgehen |
+| `mod.requires` | 0–12 Einträge, siehe nächste Tabelle, in der gewünschten Reihenfolge (Loader zuerst) |
+| `mod.sections` | aufklappbare Abschnitte mit festen `id`s (die Überschrift kommt vom Launcher): `first_steps` „Erste Schritte“ (offen), `commands` „Befehle“, `controls` „Steuerung“, `multiplayer` „Multiplayer“, `server` „Eigener Server“, `known_issues` „Bekannte Probleme“. `items`: 1–12 Zeilen `{de, en}`, mit `code` in Festbreitenschrift und mit Kopieren-Knopf. `commands` zeigt `code` links und den Text rechts als Tabelle |
+| `mod.guide_url` | optional: ausführliche Anleitung (z. B. die README im Release-Repo), Knopf „Anleitung öffnen“ |
+| `catalog` | wie bei Spielen, aber **ohne** `engine` und `user_data_dirs`; **mindestens 2** `screenshots` |
+
+Einträge in `mod.requires`:
+
+| Feld | Regel |
+|---|---|
+| `type` | `loader` = der Mod-Loader (geprüft über das Profil), `mod` = eine andere Mod (geprüft über die `.jar` im Mods-Ordner), `program` = etwas außerhalb von Minecraft (nicht prüfbar, aufklappbar mit Schritten) |
+| `name` | Anzeigename, Text oder `{de, en}`, höchstens 48 Zeichen |
+| `mod_id` | bei `mod` Pflicht: die `id` aus der `fabric.mod.json` dieser Mod (`fabric-api`, `voicechat`). Bei `loader` optional (Standard `fabricloader`), bei `program` nie |
+| `min_version` | optional: Mindestversion wie in deren `fabric.mod.json` (`0.165.0+26.3`); ist sie im Profil älter, zeigt der Launcher ⚠ „zu alt“ |
+| `optional` | `true` = empfohlen (☆) statt Pflicht. Nicht beim Loader |
+| `url` | Seite zum Herunterladen („Seite öffnen“) |
+| `why` | ein Satz: wofür es gebraucht wird |
+| `without` | bei `optional`: was man ohne verpasst |
+| `size` | bei `program`: Downloadgröße, z. B. `"0,5–1,6 GB"` (höchstens 24 Zeichen) |
+| `links` | bis zu 4 weitere Links `{"label": {de, en}, "url": …}` |
+| `steps` | bis zu 6 Schritte „So geht's“: `{de, en}`, mit oder ohne `code` |
+| `check` | bei `program`: wie man prüft, ob es läuft |
+| `alternative` | bei `program`: ein anderer Weg |
+
+**Erlaubte Links** (`url`, `links`, `guide_url`): nur `https://` zu modrinth.com, curseforge.com, fabricmc.net, github.com und huggingface.co (auch Unterseiten wie `www.curseforge.com`). Andere Links zeigt der Launcher nicht.
+**Grenzen:** jeder Satz DE **und** EN, höchstens 200 Zeichen; Namen höchstens 48, `code` höchstens 300 Zeichen. Der Launcher kürzt Zu-Langes und lässt Kaputtes weg – `check` meldet beides vorher als `PROBLEM`, auch unbekannte Felder (Tippfehler wie `minVersion`). Schreib die Texte für Freunde, nicht für Programmierer.
+
+**Schritt 6 – Bilder:** wie bei Spielen (Icon 256×256, Cover 1920×1080, Screenshots 1920×1080), aber **mindestens 2 Screenshots** – die Mod-Seite lebt von ihren Bildern. In Minecraft: Vollbild auf einem Full-HD-Bildschirm, F1 blendet die Leiste aus, F2 speichert nach `<Profil>\screenshots\`. Kleine Bilder (z. B. 854×480 aus einem Test-Client) nicht hochrechnen, lieber neu aufnehmen. Keine Spielernamen, Server-Adressen oder Chats mit Namen im Bild. Hat die Mod kein Icon, baue eines aus einem Motiv der Mod und zeig es dem Benutzer.
+
+**Schritt 7 – Manifest:** Format 2 mit einer Datei der Art `mod` und den Texten aus `mod` (so wie in `dasdimo.json`):
+```json
+{
+	"format": 2,
+	"game": "Beispielmod",
+	"game_id": "beispielmod",
+	"repo": "dasdimo/beispielmod-releases",
+	"version": "0.2.0",
+	"tag": "v0.2.0",
+	"date": "2026-11-02",
+	"launcher_version": "",
+	"min_launcher": "1.4.0",
+	"mod_id": "beispielmod",
+	"minecraft": {"version": "26.3", "loader": "fabric", "loader_version": "0.20.1", "java": "25", "side": "both"},
+	"important": […], "requires": […], "sections": […], "guide_url": "…",
+	"files": [
+		{"kind": "mod", "loader": "fabric", "path": "beispielmod-0.2.0.jar", "arch": "all", "size": 13293908, "sha256": "64 Hex-Zeichen …", "url": "https://github.com/dasdimo/beispielmod-releases/releases/download/v0.2.0/beispielmod-0.2.0.jar"}
+	],
+	"news": […]
+}
+```
+`min_launcher` ist bei Mods immer `1.4.0` (schreibt das Skript). Kein `exe`. Die `.jar` behält im Release ihren Namen (`path` = Dateiname im Mods-Ordner).
+
+**Schritt 8 – README:** Deutsch oben, Englisch darunter: was die Mod macht (2–3 Sätze), was man braucht (Minecraft-Version, Loader, Pflicht-Mods, Programme), wie man sie bekommt: über den DasDimo Launcher (Link https://github.com/dasdimo/dasdimo-launcher-releases) – er legt sie ins Profil, hält sie aktuell und zeigt, was fehlt. Ob die README auch sagt „Wer Mods selbst verwaltet: die `.jar` aus dem neuesten Release“, entscheidet der Benutzer. Dazu die ausführliche Einrichtung der Zusatz-Programme (`guide_url` zeigt hierher), Lizenzen/Credits, an wen man Fehler schickt. Die Release-Notizen schreibt das Skript („So bekommst du es“, „Braucht: Minecraft 26.3 · Fabric Loader ≥ 0.20.1 · …“, Tabelle mit der `.jar` und SHA-256).
+
+**Schritt 9 – Prüfen:** `check` zeigt die `.jar` und was ihre `fabric.mod.json` sagt (`id`, `version`, `depends`). Dazu `NOTE`-Zeilen – kein Fehler, aber anschauen: eine andere Version als das Release, oder eine Abhängigkeit aus `depends`, die `requires` nicht nennt (die sieht der Spieler dann nicht). `diff` sagt, ob die Spieler eine neue `.jar` laden.
+
+**Schritt 10 – Release:** wie bei Spielen. **Discord:** Ein Beitrag kommt nur, wenn der Benutzer für die Mod ein eigenes Forum mit Webhook eingerichtet hat (Schlüssel = `game_id`, siehe „Discord-Beitrag“). Frag ihn beim ersten Release, ob er eines will – ohne Webhook steht nur ein Hinweis.
+
+**Schritt 11 – Test:** Der Launcher braucht dafür Version 1.4.0 oder neuer. Automatisch, alles im Testordner (die echten Minecraft-Profile bleiben unberührt):
+```powershell
+$launcher = "$env:LOCALAPPDATA\DasDimo-Launcher\Launcher\DasDimoLauncher.exe"
+$test = "$env:TEMP\dasdimo-launcher-test\<game_id>"
+$list = (Resolve-Path "builds\dasdimo-release\games.local.json").Path
+New-Item -ItemType Directory -Force "$test\mods" | Out-Null
+& $launcher -- "--catalog-url=$list" "--root-dir=$test\launcher" --portable --game=<game_id> "--mod-target=$test\mods" --auto-update --quit-when-done | Out-Null
+Get-Content "$test\launcher\Launcher\launcher.log"; Get-Content "$test\launcher\Games\<game_id>\installed.json"; Get-ChildItem "$test\mods"
+```
+Erwartet: im Log `<game_id>: installed <version> as …`, in `installed.json` `"kind": "mod"` und `"version": "<version>"`, die `.jar` in `$test\mods`. Mit `--root-dir` sieht der Launcher keine echten Profile; `--mod-target` gibt ihm den Testordner als Ziel.
+Test mit dem Benutzer: denselben Befehl ohne `--mod-target`, `--auto-update` und `--quit-when-done`, dafür mit `"--minecraft-home=$env:APPDATA"` – dann liest der Launcher die echten Profile (nur lesen), und „Was du brauchst“ prüft sie wirklich. Bitte den Benutzer, die Seite anzuschauen und „Wohin installieren?“ zu öffnen. Installiert er dabei in ein echtes Profil, liegt die Mod dort wirklich – vor dem Löschen des Testordners über ⋯ → „Entfernen …“ wieder herausnehmen.
+
+**Schritt 12 – Eintragen:** wie bei Spielen. `register` trägt `"type": "minecraft_mod"` und beide Plattformen ein. Launcher bis 1.3.x überspringen den Eintrag.
+
+**Schritt 13 – Neue Version:** Version in `gradle.properties` erhöhen, `news.json` ergänzen, `gradlew build` (und die Tests der Mod), dann `check`, `diff`, `discord --dry-run` und – nach Ja des Benutzers – `release`. Neue Texte für die Mod-Seite (z. B. ein neuer Befehl) stehen in `mod` und kommen mit dem nächsten Release; neue Bilder, Untertitel oder Status mit `register`.
+
 ## Fehlerhilfe
 | Meldung | Lösung |
 |---|---|
@@ -316,6 +487,14 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 | `… A tag is required …` | Im Forum ist „Tag erforderlich“ eingeschaltet – der Benutzer schaltet es in den Forum-Einstellungen aus, dann `discord` |
 | `did not create a forum post` / `HTTP 400 … thread_name` | Der Webhook gehört zu einem normalen Kanal statt zu einem Forum – Webhook im Forum anlegen |
 | `… is not a Discord webhook address` | Eintrag in `discord.json` kaputt – Benutzer startet `webhooks_einrichten.cmd` und fügt die Adresse neu ein |
+| Mod: `mod missing: build/libs/…` | `gradlew build` laufen lassen; `files[].jar` passt nicht zum Namen in `build/libs/` |
+| Mod: `no fabric.mod.json inside` | falsche `.jar` (`-sources`/`-dev`), oder eine Forge-Mod mit `"loader": "fabric"` |
+| Mod: `… says id '…', the launcher looks for '…'` | `mod.mod_id` auf die `id` aus `fabric.mod.json` setzen |
+| Mod: `… an https link to modrinth.com, …` | Link auf eine erlaubte Seite ändern (Modrinth, CurseForge, fabricmc.net, GitHub, Hugging Face) oder weglassen |
+| Mod: `… unknown (…)` | Tippfehler im Feldnamen (z. B. `minVersion` statt `min_version`) |
+| Mod: `catalog.screenshots: a mod needs at least 2` | mindestens 2 Screenshots (Teil „Minecraft-Mods“, Schritt 6) |
+| Mod: `NOTE … depends on '…'` | Die Mod braucht noch etwas, das `requires` nicht nennt – ergänzen, oder bewusst weglassen (z. B. eine eingebaute Bibliothek) |
+| Launcher: Mod erscheint nicht | Launcher älter als 1.4.0 (aktualisiert sich selbst), oder der Eintrag hat weniger als 2 Screenshots (`launcher.log`: `skipped`) |
 
 ---
 
@@ -323,7 +502,7 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game (helper version 4, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 5, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
@@ -335,15 +514,18 @@ Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus d
 //     (runs by itself after "release" when %APPDATA%\DasDimo\discord.json has a webhook for the game_id)
 // A game is one exe per arch ("path", manifest format 1: every update loads it whole) or a build folder
 // ("dir" + "exe", format 2: the launcher loads only the files that changed).
+// A Minecraft mod ("type": "minecraft_mod") is one .jar per loader ("jar" + "loader": format 2, files of kind "mod")
+// plus the texts of its page in the launcher ("mod": minecraft, important, requires, sections, guide_url).
 // Public commits (README, pictures, games.json) use the GitHub noreply address, never the local git e-mail.
 "use strict";
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
+const zlib = require("zlib");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 4;
+const HELPER_VERSION = 5;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -389,6 +571,24 @@ const DISCORD_COLOR = 0xfd7a10;
 const DISCORD_IMAGES = 4;
 const DISCORD_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_TYPES = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif" };
+// Minecraft mods: the launcher's rules (core/mod_info.gd, core/release_manifest.gd, core/game_catalog.gd).
+const GAME_TYPE = "game";
+const MOD_TYPE = "minecraft_mod";
+const MOD_MIN_LAUNCHER = "1.4.0";
+const MOD_MIN_SCREENSHOTS = 2;
+const JAR_RE = /^[0-9A-Za-z][0-9A-Za-z.+_-]{0,123}\.jar$/;
+const MAX_MOD_FILES = 4;
+const LOADERS = ["fabric", "quilt", "forge", "neoforge"];
+const LOADER_NAMES = { fabric: "Fabric", quilt: "Quilt", forge: "Forge", neoforge: "NeoForge" };
+const SIDES = ["client", "server", "both"];
+const REQUIRE_TYPES = ["loader", "mod", "program"];
+const SECTION_IDS = ["first_steps", "commands", "controls", "multiplayer", "server", "known_issues"];
+const LINK_HOSTS = ["modrinth.com", "curseforge.com", "fabricmc.net", "github.com", "huggingface.co"];
+const MOD_VERSION_RE = /^[0-9A-Za-z][0-9A-Za-z.+_-]{0,39}$/;
+const MOD_ID_RE = /^[a-z][a-z0-9_.-]{1,63}$/;
+const MOD_LIMITS = { text: 200, name: 48, code: 300, important: 3, requires: 12, steps: 6, links: 4, items: 12, size: 24 };
+// Dependencies in fabric.mod.json that "requires" does not need to name.
+const BUILT_IN_DEPENDS = ["minecraft", "java", "fabricloader", "quilt_loader"];
 
 const ROOT = path.resolve(__dirname, "..", "..");
 
@@ -460,6 +660,7 @@ function loadConfig(file) {
 	cfg.readme_file = cfg.readme_file || "tools/dasdimo/README.md";
 	cfg.out_dir = cfg.out_dir || "builds/dasdimo-release";
 	cfg.catalog = cfg.catalog || {};
+	cfg.type = cfg.type || GAME_TYPE;
 	return cfg;
 }
 
@@ -469,7 +670,10 @@ function configProblems(cfg) {
 	if (typeof cfg.game_name !== "string" || !cfg.game_name.trim()) problems.push("game_name missing");
 	if (!REPO_RE.test(cfg.repo || "")) problems.push("repo must look like dasdimo/<name>-releases");
 	if (cfg.manifest_name !== undefined && !MANIFEST_NAME_RE.test(cfg.manifest_name)) problems.push("manifest_name: a file name like manifest.json");
-	if (!Array.isArray(cfg.files) || !cfg.files.length) problems.push("files missing");
+	if (![GAME_TYPE, MOD_TYPE].includes(cfg.type)) problems.push(`type: "${GAME_TYPE}" (default) or "${MOD_TYPE}"`);
+	if (!isMod(cfg) && cfg.mod !== undefined) problems.push(`mod: only for "type": "${MOD_TYPE}"`);
+	if (isMod(cfg)) problems.push(...modFileProblems(cfg), ...modProblems(cfg));
+	else if (!Array.isArray(cfg.files) || !cfg.files.length) problems.push("files missing");
 	else {
 		for (const [i, file] of cfg.files.entries()) {
 			const hasPath = typeof file.path === "string" && file.path !== "";
@@ -510,11 +714,16 @@ function catalogProblems(cfg) {
 		if (typeof text !== "string" || !text.trim() || text.length > 90) problems.push(`catalog.tagline.${lang}: 1-90 characters`);
 	}
 	if (!/^#[0-9A-Fa-f]{6}$/.test(c.accent || "")) problems.push("catalog.accent like #FF7A1A");
-	if (typeof c.engine !== "string" || !c.engine.trim()) problems.push("catalog.engine missing (e.g. \"Godot 4.5\")");
-	if (!STATUSES.includes(c.status)) problems.push("catalog.status: testing, released or hidden");
-	if (!Array.isArray(c.user_data_dirs) || c.user_data_dirs.some((dir) => !DATA_DIR_RE.test(dir))) {
-		problems.push("catalog.user_data_dirs: list of folders below %APPDATA%\\, %LOCALAPPDATA%\\ or %USERPROFILE%\\AppData\\LocalLow\\ (may be empty)");
+	if (isMod(cfg)) {
+		if (c.engine !== undefined) problems.push("catalog.engine: not for a mod (its page shows Minecraft, loader and Java)");
+		if (c.user_data_dirs !== undefined) problems.push("catalog.user_data_dirs: not for a mod - its settings live in the Minecraft profile");
+	} else {
+		if (typeof c.engine !== "string" || !c.engine.trim()) problems.push("catalog.engine missing (e.g. \"Godot 4.5\")");
+		if (!Array.isArray(c.user_data_dirs) || c.user_data_dirs.some((dir) => !DATA_DIR_RE.test(dir))) {
+			problems.push("catalog.user_data_dirs: list of folders below %APPDATA%\\, %LOCALAPPDATA%\\ or %USERPROFILE%\\AppData\\LocalLow\\ (may be empty)");
+		}
 	}
+	if (!STATUSES.includes(c.status)) problems.push("catalog.status: testing, released or hidden");
 	for (const [key, rule] of Object.entries(PICTURES)) {
 		const file = c[key];
 		if (!file) {
@@ -531,6 +740,9 @@ function catalogProblems(cfg) {
 		for (const [i, file] of shots.entries()) {
 			const problem = pictureProblem(rel(file), SCREENSHOT);
 			if (problem) problems.push(`catalog.screenshots[${i}] (${file}): ${problem}`);
+		}
+		if (isMod(cfg) && shots.length < MOD_MIN_SCREENSHOTS) {
+			problems.push(`catalog.screenshots: a mod needs at least ${MOD_MIN_SCREENSHOTS} (its page lives from its pictures)`);
 		}
 	}
 	return problems;
@@ -696,6 +908,291 @@ function diffFiles(installed, wanted) {
 	return { download, remove, downloadBytes: sum(download), totalBytes: sum(wanted) };
 }
 
+// ---------- Minecraft mods ----------
+
+function isObject(value) {
+	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isMod(cfg) {
+	return cfg.type === MOD_TYPE;
+}
+
+// The id in the mod's fabric.mod.json: "mod.mod_id", else the game_id.
+function modId(cfg) {
+	const mod = isObject(cfg.mod) ? cfg.mod : {};
+	return String(mod.mod_id === undefined ? cfg.game_id : mod.mod_id);
+}
+
+// A mod's files: [{jar, loader}], one .jar per loader, the same for every PC.
+function modFileProblems(cfg) {
+	const example = '{"jar": "build/libs/mymod-{version}.jar", "loader": "fabric"}';
+	if (!Array.isArray(cfg.files) || !cfg.files.length || cfg.files.length > MAX_MOD_FILES) {
+		return [`files: 1-${MAX_MOD_FILES} entries like ${example}`];
+	}
+	const problems = [];
+	for (const [i, file] of cfg.files.entries()) {
+		if (!isObject(file)) {
+			problems.push(`files[${i}]: ${example}`);
+			continue;
+		}
+		if (typeof file.jar !== "string" || !file.jar.toLowerCase().endsWith(".jar")) {
+			problems.push(`files[${i}].jar: the built mod, like "build/libs/mymod-{version}.jar" (not -sources.jar)`);
+		}
+		if (!LOADERS.includes(file.loader)) problems.push(`files[${i}].loader: ${LOADERS.join(", ")}`);
+		for (const key of Object.keys(file)) {
+			if (!["jar", "loader"].includes(key)) problems.push(`files[${i}].${key}: not for a mod (a .jar is the same on every PC)`);
+		}
+	}
+	if (new Set(cfg.files.map((file) => isObject(file) && file.loader)).size !== cfg.files.length) problems.push("files: one .jar per loader");
+	return problems;
+}
+
+// {de, en} with 1-limit characters each; a name may also be one text for both languages.
+function textsProblem(value, where, limit, plain = false) {
+	if (plain && typeof value === "string") return value.trim() && value.trim().length <= limit ? "" : `${where}: 1-${limit} characters`;
+	if (!isObject(value)) return `${where}: {"de": "...", "en": "..."}`;
+	const extra = Object.keys(value).find((key) => !["de", "en"].includes(key));
+	if (extra) return `${where}.${extra}: only de and en`;
+	const lang = ["de", "en"].find((key) => typeof value[key] !== "string" || !value[key].trim() || value[key].trim().length > limit);
+	return lang ? `${where}.${lang}: 1-${limit} characters` : "";
+}
+
+// A step or a line of a section: {de, en}, {code} (a command, shown with a copy button) or both.
+function stepProblem(value, where) {
+	if (!isObject(value)) return `${where}: {"de": "...", "en": "...", "code": "..."}`;
+	const { code, ...texts } = value;
+	if (code !== undefined && (typeof code !== "string" || !code.trim() || code.trim().length > MOD_LIMITS.code)) {
+		return `${where}.code: 1-${MOD_LIMITS.code} characters`;
+	}
+	return code !== undefined && !Object.keys(texts).length ? "" : textsProblem(texts, where, MOD_LIMITS.text);
+}
+
+function linkProblem(url, where) {
+	return allowedLink(url) ? "" : `${where}: an https link to ${LINK_HOSTS.join(", ")} (the launcher shows no others)`;
+}
+
+// The launcher's rule (core/mod_info.gd is_allowed_link): https, one of LINK_HOSTS or a subdomain, no user, no port.
+function allowedLink(url) {
+	if (typeof url !== "string" || !url.startsWith("https://") || url.length > 300 || /[\s\\]/.test(url)) return false;
+	const host = url.slice(8).split(/[/?#]/)[0].toLowerCase();
+	if (!host || host.includes("@") || host.includes(":")) return false;
+	return LINK_HOSTS.some((allowed) => host === allowed || host.endsWith("." + allowed));
+}
+
+// The texts of the mod's page ("mod" in dasdimo.json). The launcher cuts or leaves out what breaks its rules
+// (core/mod_info.gd) - the helper stops instead, so nothing goes missing unnoticed.
+function modProblems(cfg) {
+	const mod = cfg.mod;
+	if (!isObject(mod)) return ['mod missing: the texts of the mod page {"minecraft": {...}, "requires": [...], ...} (INTEGRATION.md, "Minecraft-Mods")'];
+	const problems = [];
+	const add = (problem) => {
+		if (problem) problems.push(problem);
+	};
+	const keys = (object, allowed, where) => {
+		for (const key of Object.keys(object)) if (!allowed.includes(key)) add(`${where}.${key}: unknown (${allowed.join(", ")})`);
+	};
+	const list = (value, limit, where, each) => {
+		if (value === undefined) return;
+		if (!Array.isArray(value) || value.length > limit) return add(`${where}: a list of at most ${limit}`);
+		value.forEach((item, i) => each(item, `${where}[${i}]`));
+	};
+	keys(mod, ["mod_id", "minecraft", "important", "requires", "sections", "guide_url"], "mod");
+	if (!MOD_ID_RE.test(modId(cfg))) add("mod.mod_id: the id in fabric.mod.json (a-z 0-9 _ . -, starts with a letter) - needed when it is not the game_id");
+	const mc = mod.minecraft;
+	if (!isObject(mc)) add('mod.minecraft: {"version": "26.3", "loader": "fabric", "loader_version": "0.20.1", "java": "25", "side": "both"}');
+	else {
+		keys(mc, ["version", "loader", "loader_version", "java", "side"], "mod.minecraft");
+		if (!MOD_VERSION_RE.test(mc.version || "")) add('mod.minecraft.version: like "26.3"');
+		if (!LOADERS.includes(mc.loader)) add(`mod.minecraft.loader: ${LOADERS.join(", ")}`);
+		else if (Array.isArray(cfg.files) && !cfg.files.some((file) => isObject(file) && file.loader === mc.loader)) {
+			add(`mod.minecraft.loader: no .jar for ${mc.loader} in files`);
+		}
+		if (mc.loader_version !== undefined && !MOD_VERSION_RE.test(mc.loader_version)) add('mod.minecraft.loader_version: like "0.20.1" (or leave it out)');
+		if (mc.java !== undefined && !/^[0-9]{1,3}$/.test(mc.java)) add('mod.minecraft.java: like "25" (or leave it out)');
+		if (mc.side !== undefined && !SIDES.includes(mc.side)) add(`mod.minecraft.side: ${SIDES.join(", ")} (default both)`);
+	}
+	list(mod.important, MOD_LIMITS.important, "mod.important", (item, where) => add(textsProblem(item, where, MOD_LIMITS.text)));
+	list(mod.requires, MOD_LIMITS.requires, "mod.requires", (need, where) => {
+		if (!isObject(need)) return add(`${where}: {"type": "mod", "name": "...", "mod_id": "..."}`);
+		keys(need, ["type", "name", "mod_id", "min_version", "optional", "url", "why", "without", "check", "alternative", "size", "links", "steps"], where);
+		if (!REQUIRE_TYPES.includes(need.type)) add(`${where}.type: ${REQUIRE_TYPES.join(", ")}`);
+		add(textsProblem(need.name, where + ".name", MOD_LIMITS.name, true));
+		if (need.type === "mod" && !MOD_ID_RE.test(need.mod_id || "")) add(`${where}.mod_id: the id in that mod's fabric.mod.json, like "fabric-api"`);
+		if (need.type === "loader" && need.mod_id !== undefined && !MOD_ID_RE.test(need.mod_id)) add(`${where}.mod_id: like "fabricloader" (or leave it out)`);
+		if (need.type === "program" && need.mod_id !== undefined) add(`${where}.mod_id: a program has none (the launcher cannot check it)`);
+		if (need.min_version !== undefined && !MOD_VERSION_RE.test(need.min_version)) add(`${where}.min_version: like "0.165.0+26.3"`);
+		if (need.optional !== undefined && typeof need.optional !== "boolean") add(`${where}.optional: true or false`);
+		if (need.type === "loader" && need.optional) add(`${where}.optional: the loader is always needed`);
+		if (need.url !== undefined) add(linkProblem(need.url, where + ".url"));
+		for (const key of ["why", "without", "check", "alternative"]) {
+			if (need[key] !== undefined) add(textsProblem(need[key], `${where}.${key}`, MOD_LIMITS.text));
+		}
+		if (need.size !== undefined && (typeof need.size !== "string" || !need.size.trim() || need.size.trim().length > MOD_LIMITS.size)) {
+			add(`${where}.size: like "0,5-1,6 GB" (at most ${MOD_LIMITS.size} characters)`);
+		}
+		list(need.links, MOD_LIMITS.links, where + ".links", (link, at) => {
+			if (!isObject(link)) return add(`${at}: {"label": {"de": "...", "en": "..."}, "url": "https://..."}`);
+			keys(link, ["label", "url"], at);
+			add(textsProblem(link.label, at + ".label", MOD_LIMITS.name, true));
+			add(linkProblem(link.url, at + ".url"));
+		});
+		list(need.steps, MOD_LIMITS.steps, where + ".steps", (step, at) => add(stepProblem(step, at)));
+	});
+	const seen = new Set();
+	list(mod.sections, SECTION_IDS.length, "mod.sections", (section, where) => {
+		if (!isObject(section)) return add(`${where}: {"id": "commands", "items": [...]}`);
+		keys(section, ["id", "items"], where);
+		if (!SECTION_IDS.includes(section.id)) add(`${where}.id: ${SECTION_IDS.join(", ")}`);
+		else if (seen.has(section.id)) add(`${where}.id: ${section.id} twice`);
+		seen.add(section.id);
+		if (!Array.isArray(section.items) || !section.items.length) add(`${where}.items: 1-${MOD_LIMITS.items} lines`);
+		else list(section.items, MOD_LIMITS.items, where + ".items", (step, at) => add(stepProblem(step, at)));
+	});
+	if (mod.guide_url !== undefined) add(linkProblem(mod.guide_url, "mod.guide_url"));
+	return problems;
+}
+
+// One file of a zip (a .jar) by its exact name, null when it is not there or broken. Reads only the zip's directory
+// (at the end) and that entry.
+function zipEntry(buf, wanted) {
+	let end = -1;
+	for (let i = buf.length - 22; i >= Math.max(0, buf.length - 22 - 0xffff); i--) {
+		if (buf.readUInt32LE(i) === 0x06054b50) {
+			end = i;
+			break;
+		}
+	}
+	if (end < 0) return null;
+	const count = buf.readUInt16LE(end + 10);
+	let at = buf.readUInt32LE(end + 16);
+	for (let n = 0; n < count && at + 46 <= buf.length && buf.readUInt32LE(at) === 0x02014b50; n++) {
+		const nameLength = buf.readUInt16LE(at + 28);
+		if (buf.toString("utf8", at + 46, at + 46 + nameLength) === wanted) {
+			const method = buf.readUInt16LE(at + 10);
+			const packed = buf.readUInt32LE(at + 20);
+			const local = buf.readUInt32LE(at + 42);
+			if (local + 30 > buf.length || buf.readUInt32LE(local) !== 0x04034b50) return null;
+			const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
+			const data = buf.subarray(start, start + packed);
+			try {
+				if (method === 0) return data;
+				if (method === 8) return zlib.inflateRawSync(data);
+			} catch (error) {
+				return null;
+			}
+			return null;
+		}
+		at += 46 + nameLength + buf.readUInt16LE(at + 30) + buf.readUInt16LE(at + 32);
+	}
+	return null;
+}
+
+// What the .jar says about itself, like the launcher (core/jar_info.gd): fabric.mod.json, else quilt.mod.json.
+// {file, id, version, depends: {id: versions}}, null for none (a Forge mod, the wrong .jar).
+function jarInfo(full) {
+	let buf;
+	try {
+		buf = fs.readFileSync(full);
+	} catch (error) {
+		return null;
+	}
+	const json = (name) => {
+		const data = zipEntry(buf, name);
+		try {
+			return data ? JSON.parse(data.toString("utf8").replace(/^﻿/, "")) : null;
+		} catch (error) {
+			return null;
+		}
+	};
+	const fabric = json("fabric.mod.json");
+	if (isObject(fabric) && typeof fabric.id === "string" && fabric.id.trim()) {
+		return { file: "fabric.mod.json", id: fabric.id.trim().toLowerCase(), version: String(fabric.version || "").trim(),
+			depends: isObject(fabric.depends) ? fabric.depends : {} };
+	}
+	const quilt = json("quilt.mod.json");
+	const loader = isObject(quilt) && isObject(quilt.quilt_loader) ? quilt.quilt_loader : null;
+	if (loader && typeof loader.id === "string" && loader.id.trim()) {
+		const depends = {};
+		for (const item of Array.isArray(loader.depends) ? loader.depends : []) {
+			if (typeof item === "string") depends[item] = "*";
+			else if (isObject(item) && typeof item.id === "string") depends[item.id] = item.versions || "*";
+		}
+		return { file: "quilt.mod.json", id: loader.id.trim().toLowerCase(), version: String(loader.version || "").trim(), depends };
+	}
+	return null;
+}
+
+// The .jar files as builds [{arch: "all", loader, source, files: [{path, full, size}], info}].
+function readJars(cfg, baseVersion) {
+	const problems = [];
+	const builds = [];
+	for (const entry of cfg.files) {
+		const full = rel(entry.jar.replace(/\{version\}/g, baseVersion));
+		const name = path.basename(full);
+		if (!fs.existsSync(full)) {
+			problems.push("mod missing: " + path.relative(ROOT, full) + " - build the mod first (gradlew build)");
+			continue;
+		}
+		if (!JAR_RE.test(name)) {
+			problems.push(`file name '${name}': only letters, digits, . + _ - and ending .jar`);
+			continue;
+		}
+		const info = jarInfo(full);
+		if (["fabric", "quilt"].includes(entry.loader)) {
+			if (!info) problems.push(`${name}: no fabric.mod.json inside - the right .jar (not -sources.jar or -dev.jar)?`);
+			else if (info.id !== modId(cfg)) {
+				problems.push(`${name}: ${info.file} says id '${info.id}', the launcher looks for '${modId(cfg)}' (set mod.mod_id) - it finds old files of the mod by this id`);
+			}
+		}
+		builds.push({ arch: "all", loader: entry.loader, source: full, files: [{ path: name, full, size: fs.statSync(full).size }], info });
+	}
+	if (new Set(builds.map((build) => build.files[0].path.toLowerCase())).size !== builds.length) problems.push("files: every loader needs its own .jar name");
+	return { format: 2, builds, problems };
+}
+
+// Hints from the .jar's own fabric.mod.json - no problem, but worth a look.
+function jarNotes(cfg, build, version) {
+	const notes = [];
+	const name = build.files[0].path;
+	if (!build.info) {
+		notes.push(`${name}: the launcher reads only fabric.mod.json / quilt.mod.json - it cannot see old files of a ${LOADER_NAMES[build.loader]} mod`);
+		return notes;
+	}
+	if (build.info.version !== version) notes.push(`${name}: ${build.info.file} says version '${build.info.version}', the release is ${version}`);
+	const named = new Set((Array.isArray(cfg.mod.requires) ? cfg.mod.requires : []).filter(isObject).map((need) => need.mod_id));
+	for (const id of Object.keys(build.info.depends)) {
+		if (BUILT_IN_DEPENDS.includes(id) || named.has(id) || (id === "fabric" && named.has("fabric-api"))) continue;
+		notes.push(`${name}: ${build.info.file} depends on '${id}', mod.requires does not name it - players would not know they need it`);
+	}
+	return notes;
+}
+
+// The page texts for the manifest, as in dasdimo.json.
+function modPage(cfg) {
+	const page = { mod_id: modId(cfg), minecraft: cfg.mod.minecraft };
+	for (const key of ["important", "requires", "sections", "guide_url"]) {
+		if (cfg.mod[key] !== undefined) page[key] = cfg.mod[key];
+	}
+	return page;
+}
+
+// "Minecraft 26.3", "Fabric Loader ≥ 0.20.1", "Java 25", then the needed mods and programs (release notes).
+function modNeeds(manifest, lang) {
+	const mc = manifest.minecraft;
+	const name = (value) => (typeof value === "string" ? value : value[lang] || value.en || value.de);
+	const requires = Array.isArray(manifest.requires) ? manifest.requires : [];
+	const loader = requires.find((need) => need.type === "loader");
+	const loaderName = loader ? name(loader.name) : `${LOADER_NAMES[mc.loader]} Loader`;
+	const loaderVersion = (loader && loader.min_version) || mc.loader_version;
+	const needs = [`Minecraft ${mc.version}`, loaderVersion ? `${loaderName} ≥ ${loaderVersion}` : loaderName];
+	if (mc.java) needs.push(`Java ${mc.java}`);
+	for (const need of requires) {
+		if (need.type !== "loader" && !need.optional) needs.push(need.min_version ? `${name(need.name)} ≥ ${need.min_version}` : name(need.name));
+	}
+	return needs;
+}
+
 // ---------- pictures ----------
 
 function pictureSize(buf) {
@@ -789,8 +1286,9 @@ function makeRelease(cfg, suffix) {
 	const version = suffix ? `${baseVersion}-${suffix}` : baseVersion;
 	if (!VERSION_RE.test(version)) fail(`invalid version '${version}'`);
 	const tag = "v" + version;
-	const { format, builds, problems } = readBuilds(cfg, baseVersion);
-	const result = { version, tag, format, builds, manifest: null, assets: [], problems };
+	const mod = isMod(cfg);
+	const { format, builds, problems } = mod ? readJars(cfg, baseVersion) : readBuilds(cfg, baseVersion);
+	const result = { version, tag, format, builds, manifest: null, assets: [], problems, mod };
 	if (problems.length) return result;
 	const hashes = new Map();
 	const hash = (full) => {
@@ -802,10 +1300,16 @@ function makeRelease(cfg, suffix) {
 		const old = assets.get(name.toLowerCase());
 		if (old && old.sha256 !== file.sha256) problems.push(`two different files would be called ${name} on GitHub`);
 		else if (!old) assets.set(name.toLowerCase(), { name, full: file.full, size: file.size, sha256: file.sha256 });
-		return `https://github.com/${cfg.repo}/releases/download/${tag}/${name}`;
+		return `https://github.com/${cfg.repo}/releases/download/${tag}/${encodeURIComponent(name)}`;
 	};
 	let files;
-	if (format === 1) {
+	if (mod) {
+		// The .jar keeps its name: it goes into a mods folder as it is.
+		files = builds.map((build) => {
+			const file = { ...build.files[0], sha256: hash(build.files[0].full) };
+			return { kind: "mod", loader: build.loader, path: file.path, arch: "all", size: file.size, sha256: file.sha256, url: addAsset(file.path, file) };
+		});
+	} else if (format === 1) {
 		files = builds.map((build) => {
 			const file = { ...build.files[0], sha256: hash(build.files[0].full) };
 			return { kind: "game", arch: build.arch, name: file.path, size: file.size, sha256: file.sha256, url: addAsset(file.path, file) };
@@ -824,7 +1328,8 @@ function makeRelease(cfg, suffix) {
 	}
 	if (assets.size > MAX_ASSETS) problems.push(`${assets.size} release files - at most ${MAX_ASSETS} (GitHub limit 1000): put small files into packs`);
 	const manifest = { format, game: cfg.game_name, game_id: cfg.game_id, repo: cfg.repo, version, tag, date: today(), launcher_version: "" };
-	if (format === 2) manifest.exe = builds[0].exe;
+	if (mod) Object.assign(manifest, { min_launcher: MOD_MIN_LAUNCHER }, modPage(cfg));
+	else if (format === 2) manifest.exe = builds[0].exe;
 	manifest.files = files;
 	manifest.news = readNews(cfg, version).news;
 	return Object.assign(result, { manifest, assets: [...assets.values()] });
@@ -832,6 +1337,10 @@ function makeRelease(cfg, suffix) {
 
 function printSummary(release) {
 	const files = release.manifest.files;
+	if (release.mod) {
+		for (const file of files) console.log(`${file.loader.padEnd(8)} ${megabytes(file.size).padStart(7)} MB  ${file.sha256}  ${file.path}`);
+		return;
+	}
 	if (release.format === 1 || files.length <= LIST_LINES) {
 		for (const file of files) {
 			console.log(`${file.arch.padEnd(6)} ${megabytes(file.size).padStart(7)} MB  ${file.sha256}  ${file.path || file.name}`);
@@ -871,9 +1380,16 @@ function releaseNotes(cfg, manifest, test) {
 	for (const lang of ["de", "en"]) {
 		const de = lang === "de";
 		lines.push(`## ${cfg.game_name} ${manifest.version}`, "");
-		lines.push(de
-			? `**So bekommst du es:** im [DasDimo Launcher](${LAUNCHER_PAGE}) – dort installieren, aktualisieren und spielen.`
-			: `**How to get it:** in the [DasDimo Launcher](${LAUNCHER_PAGE}) – install, update and play there.`, "");
+		if (manifest.minecraft) {
+			lines.push(de
+				? `**So bekommst du es:** im [DasDimo Launcher](${LAUNCHER_PAGE}) – er legt die Mod in dein Minecraft-Profil, hält sie aktuell und zeigt, was du sonst noch brauchst.`
+				: `**How to get it:** in the [DasDimo Launcher](${LAUNCHER_PAGE}) – it puts the mod into your Minecraft profile, keeps it up to date and shows what else you need.`, "");
+			lines.push(`**${de ? "Braucht" : "Needs"}:** ${modNeeds(manifest, lang).join(" · ")}`, "");
+		} else {
+			lines.push(de
+				? `**So bekommst du es:** im [DasDimo Launcher](${LAUNCHER_PAGE}) – dort installieren, aktualisieren und spielen.`
+				: `**How to get it:** in the [DasDimo Launcher](${LAUNCHER_PAGE}) – install, update and play there.`, "");
+		}
 		if (news.entries.length) {
 			lines.push(de ? "### Neu" : "### New", "");
 			for (const entry of news.entries) lines.push("- " + entry[lang]);
@@ -881,7 +1397,12 @@ function releaseNotes(cfg, manifest, test) {
 		}
 		lines.push("---", "");
 	}
-	if (manifest.format >= 2) {
+	if (manifest.minecraft) {
+		lines.push("| Datei / file | Loader | Minecraft | MB | SHA-256 |", "|---|---|---|---|---|");
+		for (const file of manifest.files) {
+			lines.push(`| ${file.path} | ${file.loader} | ${manifest.minecraft.version} | ${megabytes(file.size)} | \`${file.sha256}\` |`);
+		}
+	} else if (manifest.format >= 2) {
 		lines.push("| Build | Dateien / files | MB |", "|---|---|---|");
 		for (const arch of ARCHES) {
 			if (arch === "arm64" && !manifest.files.some((file) => file.arch === "arm64")) continue;
@@ -961,9 +1482,10 @@ function sameOnGitHub(assets, name, sha256) {
 	return Boolean(asset) && String(asset.digest || "") === "sha256:" + sha256;
 }
 
-// GitHub names a release file after the local file: format 2 files are linked (or copied) under their release name.
+// GitHub names a release file after the local file: format 2 files are linked (or copied) under their release name
+// (a mod's .jar keeps its own).
 function stageAssets(release) {
-	if (release.format < 2) return release.assets.map((asset) => ({ ...asset, file: asset.full }));
+	if (release.format < 2 || release.mod) return release.assets.map((asset) => ({ ...asset, file: asset.full }));
 	const dir = path.join(path.dirname(release.manifestPath), "files");
 	fs.rmSync(dir, { recursive: true, force: true });
 	fs.mkdirSync(dir, { recursive: true });
@@ -1180,15 +1702,25 @@ function printDiscord(title, messages, files) {
 
 function commandCheck(cfg) {
 	const problems = configProblems(cfg);
+	const notes = [];
 	if (!problems.length) {
 		const baseVersion = readVersion(cfg);
 		console.log(`${cfg.game_name} ${baseVersion} -> ${cfg.repo}`);
 		const release = makeRelease(cfg, "");
 		for (const build of release.builds) {
+			if (release.mod) {
+				console.log(`ok      ${build.loader.padEnd(8)} ${path.relative(ROOT, build.source)} (${megabytes(build.files[0].size)} MB)`);
+				if (build.info) {
+					const depends = Object.entries(build.info.depends).map(([id, versions]) => `${id} ${Array.isArray(versions) ? versions.join(" ") : versions}`);
+					console.log(`        ${build.info.file}: ${build.info.id} ${build.info.version}` + (depends.length ? ` - depends on ${depends.join(", ")}` : ""));
+				}
+				notes.push(...jarNotes(cfg, build, baseVersion));
+				continue;
+			}
 			const details = release.format === 2 ? ` (${build.files.length} file(s), ${megabytes(sum(build.files))} MB, start file ${build.exe})` : "";
 			console.log(`ok      ${build.arch.padEnd(6)} ${path.relative(ROOT, build.source)}${details}`);
 		}
-		if (release.manifest && release.format === 2) console.log(`${release.assets.length} release file(s), same files of both builds only once`);
+		if (release.manifest && release.format === 2 && !release.mod) console.log(`${release.assets.length} release file(s), same files of both builds only once`);
 		problems.push(...release.problems);
 		const news = readNews(cfg, baseVersion);
 		problems.push(...news.problems);
@@ -1197,6 +1729,7 @@ function commandCheck(cfg) {
 	}
 	if (!fs.existsSync(rel(cfg.readme_file))) problems.push("README missing: " + cfg.readme_file);
 	problems.push(...catalogProblems(cfg));
+	for (const note of notes) console.log("NOTE    " + note);
 	for (const problem of problems) console.log("PROBLEM " + problem);
 	console.log(problems.length ? `${problems.length} problem(s)` : "CHECK OK");
 	process.exit(problems.length ? 1 : 0);
@@ -1210,6 +1743,16 @@ function commandDiff(cfg, args) {
 	if (release.problems.length) fail(release.problems.join("; "));
 	const old = latestManifest(cfg, args.against);
 	console.log(`${cfg.game_name} ${release.version} compared with ` + (old ? old.label : "nothing (no release yet)"));
+	if (release.mod) {
+		const before = old ? (Array.isArray(old.manifest.files) ? old.manifest.files : []).filter((file) => file.kind === "mod") : [];
+		for (const file of release.manifest.files) {
+			const was = before.find((other) => (other.loader || "fabric") === file.loader);
+			if (!was) console.log(`${file.loader}: players load ${file.path} (${megabytes(file.size)} MB)`);
+			else if (String(was.sha256).toLowerCase() === file.sha256) console.log(`${file.loader}: the same .jar as before - players load nothing`);
+			else console.log(`${file.loader}: players load ${file.path} (${megabytes(file.size)} MB), the launcher takes out ${was.path}`);
+		}
+		return;
+	}
 	const exe = (release.manifest.exe || "").toLowerCase();
 	const exeChanged = [];
 	for (const build of release.builds) {
@@ -1273,7 +1816,7 @@ async function commandRelease(cfg, args) {
 	const wanted = [...uploads, { name: manifestName(cfg), sha256: sha256File(release.manifestPath) }];
 	const missing = wanted.filter((asset) => !sameOnGitHub(remote, asset.name, asset.sha256));
 	if (missing.length) fail("missing or different on GitHub: " + missing.map((asset) => asset.name).join(", "));
-	if (release.format === 2) {
+	if (release.format === 2 && !release.mod) {
 		// Files of an earlier upload of this release that the manifest no longer names.
 		const names = new Set(uploads.map((asset) => asset.name));
 		for (const asset of remote) {
@@ -1303,12 +1846,13 @@ function commandRegister(cfg, args) {
 	const c = cfg.catalog;
 	const entry = {
 		id: cfg.game_id,
-		type: "game",
+		type: cfg.type,
 		name: cfg.game_name,
 		repo: cfg.repo,
 		manifest_url: `https://github.com/${cfg.repo}/releases/latest/download/${manifestName(cfg)}`,
-		platforms: cfg.files.map((file) => file.arch),
-		engine: c.engine.trim(),
+		// A .jar is the same on every PC.
+		platforms: isMod(cfg) ? [...ARCHES] : cfg.files.map((file) => file.arch),
+		engine: isMod(cfg) ? undefined : c.engine.trim(),
 		status: c.status,
 		tagline: { de: c.tagline.de.trim(), en: c.tagline.en.trim() },
 		accent: c.accent.toUpperCase(),
@@ -1334,7 +1878,7 @@ function commandRegister(cfg, args) {
 		entry.screenshots = shots.map((shot) => ({ url: shot.url, sha256: shot.sha256 }));
 		local.screenshots = shots.map((shot) => ({ url: shot.local, sha256: shot.sha256 }));
 	}
-	entry.user_data_dirs = local.user_data_dirs = c.user_data_dirs;
+	if (!isMod(cfg)) entry.user_data_dirs = local.user_data_dirs = c.user_data_dirs;
 	const hubFile = getFile(HUB_REPO, CATALOG_FILE);
 	if (!hubFile && !args.dryRun) fail(`${HUB_REPO}/${CATALOG_FILE} not found`);
 	const catalog = hubFile ? JSON.parse(hubFile.content.toString("utf8")) : { format: 1, games: [] };
@@ -1440,5 +1984,5 @@ async function main() {
 
 // tools/discord/test_discord.js loads the functions without running a command.
 if (require.main === module) main().catch((error) => fail(error.message));
-else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, LAUNCHER_PAGE };
+else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, allowedLink, jarInfo, LAUNCHER_PAGE };
 ```
