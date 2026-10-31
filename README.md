@@ -21,7 +21,7 @@ Updates holt sich der Launcher selbst: Gibt es eine neue Version eines Spiels, s
 ## Gut zu wissen
 - **Wo liegt alles?** Launcher und Spiele in `%LOCALAPPDATA%\DasDimo-Launcher`. Einstellungen und Spielstände der Spiele bleiben in ihren eigenen Ordnern.
 - **Du hattest den RIFTWAKE-Launcher?** Dein installiertes RIFTWAKE und deine Einstellungen werden automatisch übernommen.
-- **Minecraft-Mods:** Links unter „Mods“ stehen DasDimos Minecraft-Mods. Der Launcher legt die Mod in dein Minecraft-Profil (Minecraft Launcher, Modrinth App, NoRisk, CurseForge oder Prism), zeigt, was du dafür noch brauchst, und hält sie aktuell. Minecraft startest du wie gewohnt.
+- **Minecraft-Mods:** Links unter „Mods“ stehen DasDimos Minecraft-Mods. Der Launcher legt die Mod in dein Minecraft-Profil (Minecraft Launcher, Modrinth App, NoRisk, CurseForge oder Prism), zeigt, was du dafür noch brauchst, und hält sie aktuell. Minecraft startest du wie gewohnt. NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
 - **Deinstallieren:** in den Einstellungen des Launchers (Zahnrad oben rechts) oder unter Windows **Einstellungen → Apps**. Dabei werden auch alle Spiele gelöscht; ihre Einstellungen und Spielstände bleiben, außer du wählst es anders.
 - **Etwas geht nicht?** Schick DasDimo die Datei `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\launcher.log`.
 - **DasDimo-Konto:** Mit einem freiwilligen Konto siehst du rechts deine Freunde und was sie spielen. Launcher und Einzelspieler gehen auch ohne. Mehr dazu unter [Datenschutz](DATENSCHUTZ.md).
@@ -53,7 +53,7 @@ The launcher fetches updates by itself: when a game has a new version, the butto
 ## Good to know
 - **Where is everything?** Launcher and games in `%LOCALAPPDATA%\DasDimo-Launcher`. Settings and saves of the games stay in their own folders.
 - **You had the RIFTWAKE launcher?** Your installed RIFTWAKE and your settings are taken over automatically.
-- **Minecraft mods:** DasDimo's Minecraft mods are listed on the left under “Mods”. The launcher puts a mod into your Minecraft profile (Minecraft Launcher, Modrinth App, NoRisk, CurseForge or Prism), shows what else you need for it and keeps it up to date. You start Minecraft as usual.
+- **Minecraft mods:** DasDimo's Minecraft mods are listed on the left under “Mods”. The launcher puts a mod into your Minecraft profile (Minecraft Launcher, Modrinth App, NoRisk, CurseForge or Prism), shows what else you need for it and keeps it up to date. You start Minecraft as usual. NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
 - **Uninstall:** in the launcher's settings (gear at the top right) or in Windows **Settings → Apps**. This also deletes all games; their settings and saves stay unless you choose otherwise.
 - **Something does not work?** Send DasDimo the file `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\launcher.log`.
 - **DasDimo account:** With an optional account you see your friends on the right and what they play. The launcher and single player work without it. More under [Privacy](DATENSCHUTZ.md#privacy-of-the-dasdimo-account).
