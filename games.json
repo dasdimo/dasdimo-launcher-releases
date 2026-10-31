@@ -84,6 +84,8 @@
 			"icon_sha256": "ae777af53fd89cf0417c950d40d704cb8ee4523b4c771bade05095df9d75307c",
 			"cover_url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/cover.jpg",
 			"cover_sha256": "6767b21e753ff3edbe1271bb1ec93b35148d31720e622aab82ea391f913b838d",
+			"logo_url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/logo.png",
+			"logo_sha256": "29c5cd0d5142f7a5ae33e628a409a623395307b757204eeea2d8d771e83fc284",
 			"screenshots": [
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/sayitjapanese-releases/main/launcher/shot1.jpg",
@@ -104,7 +106,7 @@
 			],
 			"order": 20,
 			"added": "2026-10-30",
-			"updated": "2026-10-30"
+			"updated": "2026-10-31"
 		},
 		{
 			"id": "partycraft",
