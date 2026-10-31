@@ -1,6 +1,6 @@
 {
 	"format": 1,
-	"updated": "2026-10-30",
+	"updated": "2026-10-31",
 	"games": [
 		{
 			"id": "riftwake",
@@ -105,6 +105,54 @@
 			"order": 20,
 			"added": "2026-10-30",
 			"updated": "2026-10-30"
+		},
+		{
+			"id": "partycraft",
+			"type": "minecraft_mod",
+			"name": "Partycraft",
+			"repo": "dasdimo/partycraft-releases",
+			"manifest_url": "https://github.com/dasdimo/partycraft-releases/releases/latest/download/manifest.json",
+			"platforms": [
+				"x86_64",
+				"arm64"
+			],
+			"status": "testing",
+			"tagline": {
+				"de": "Party-Brettspiel mit Minigames für 2 bis 4 Spieler, direkt in Minecraft.",
+				"en": "A party board game with minigames for 2 to 4 players, right inside Minecraft."
+			},
+			"accent": "#E0479F",
+			"icon_url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/icon.png",
+			"icon_sha256": "1a675b2a154e112f76ac829779f452517e93fef2442346c57dd3227a0f34ba2f",
+			"cover_url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/cover.jpg",
+			"cover_sha256": "1e91a9db19360e92a1a55b68cc0d8042520a34ec3b1f1a9c8d30285a054314fc",
+			"logo_url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/logo.png",
+			"logo_sha256": "67e34b2d1137bd3dc89224801af179bb2a5546ac6ec2c06a64c01afac5f04466",
+			"screenshots": [
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/shot1.jpg",
+					"sha256": "6c2be6deaae6a49d1886a924b0d0774a4a68fd6d810761039181bf8172d58087"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/shot2.jpg",
+					"sha256": "f64d733a9b38302437f9d7e7979fbb55e4047eb3ea86fdfb37cfd950481bacec"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/shot3.jpg",
+					"sha256": "1f71cd5e2733ddb6abc2cc274bc334ab7ac8bc826dd782e94b7ee666be6b8ff3"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/shot4.jpg",
+					"sha256": "a00593accdab8abdf0424b61d8cb3e9c9f436845133fccdcf81b2f485a7edbab"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/dasdimo/partycraft-releases/main/launcher/shot5.jpg",
+					"sha256": "2a945505cb7b696cd0364a024bd642f285b8f8e0401dd1697bebb7a93a93bb99"
+				}
+			],
+			"order": 30,
+			"added": "2026-10-31",
+			"updated": "2026-10-31"
 		}
 	]
 }
