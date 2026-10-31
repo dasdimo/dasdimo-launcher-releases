@@ -1,7 +1,7 @@
 # Ein Spiel oder eine Minecraft-Mod in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels oder einer Minecraft-Mod von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 7 (2026-10-30) · Hilfs-Skript `dasdimo_release.js` Version 6, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
+**Version der Anleitung:** 8 (2026-10-31) · Hilfs-Skript `dasdimo_release.js` Version 7, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
 **Neu in Version 7:** **DasDimo-Konto** (DasDimo Launcher ab 2.1.0): Ein Spiel kann erfahren, wer spielt, ohne eigene Anmeldung. Neues Feld `catalog.uses_account`, neuer Teil „DasDimo-Konto im Spiel“ (nach „Minecraft-Mods“). Das lohnt sich nur für Spiele mit Online-Funktionen und nur nach Rücksprache mit dem Benutzer. Alle anderen übernehmen nur das Skript aus dem Anhang.
 **Neu in Version 6:** **Neues Aussehen** (DasDimo Launcher ab 2.0.0): Das Cover füllt das ganze Fenster, das Logo steht groß über dem Knopf, die Neuigkeiten erscheinen als Karten unter dem Knopf. Die Hinweise zu `cover.jpg` und `logo.png` (Schritt 6) sind angepasst – ein Logo lohnt sich jetzt. Am Skript ändert sich nichts.
 **Neu in Version 5:** **Minecraft-Mods** (DasDimo Launcher ab 1.4.0): Eine Mod bekommt im Launcher eine eigene Seite, ein Klick legt die `.jar` in ein Minecraft-Profil, und die Seite zeigt, was man sonst noch braucht. Alles dazu im Teil „Minecraft-Mods“ (nach Schritt 13). Für Spiele ändert sich nichts – das Skript aus dem Anhang übernehmen genügt.
@@ -327,6 +327,7 @@ Ab **DasDimo Launcher 1.4.0** stehen auch die Minecraft-Mods des Benutzers im La
 - **Fabric/Quilt:** In der `.jar` liegt `fabric.mod.json` (bzw. `quilt.mod.json`) mit `id` und `version`; `version` = Release-Version (z. B. `${version}` aus `gradle.properties`). Daran erkennt der Launcher alte Dateien deiner Mod. Forge/NeoForge geht auch, dann kann der Launcher alte Dateien und andere Mods im Profil aber nicht erkennen.
 - **Dateiname:** nur `A–Z a–z 0–9 . + _ -`, endet auf `.jar`, höchstens 128 Zeichen. Die Version darf im Namen stehen (`beispielmod-0.2.0.jar`) – bei einem Update tauscht der Launcher seine eigene alte Datei aus.
 - **Lizenzen:** Eingebaute Bibliotheken brauchen ihren Lizenzhinweis (in der `.jar` und in der README), das Projekt eine `LICENSE`-Datei. Vor dem ersten Release mit dem Benutzer klären.
+- **Mojangs Regeln:** Verteile nur die Mod, nie ein verändertes Minecraft, und verkaufe sie nicht. Überall, wo du die Mod vorstellst, steht gut sichtbar `NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.`: in deiner README, und im Launcher und in den Release-Notizen setzen Launcher und Skript den Hinweis selbst.
 - Eine Mod hat **keine** `user_data_dirs`: Ihre Einstellungen liegen im Minecraft-Profil (`config/`) und gehören dem Spieler.
 
 **Schritt 3 – Release-Repo:** wie bei Spielen, Beschreibung z. B. `"<Name> – Minecraft-Mod (fertige .jar) / Minecraft mod downloads"`.
@@ -447,7 +448,7 @@ Einträge in `mod.requires`:
 ```
 `min_launcher` ist bei Mods immer `1.4.0` (schreibt das Skript). Kein `exe`. Die `.jar` behält im Release ihren Namen (`path` = Dateiname im Mods-Ordner).
 
-**Schritt 8 – README:** Deutsch oben, Englisch darunter: was die Mod macht (2–3 Sätze), was man braucht (Minecraft-Version, Loader, Pflicht-Mods, Programme), wie man sie bekommt: über den DasDimo Launcher (Link https://github.com/dasdimo/dasdimo-launcher-releases) – er legt sie ins Profil, hält sie aktuell und zeigt, was fehlt. Ob die README auch sagt „Wer Mods selbst verwaltet: die `.jar` aus dem neuesten Release“, entscheidet der Benutzer. Dazu die ausführliche Einrichtung der Zusatz-Programme (`guide_url` zeigt hierher), Lizenzen/Credits, an wen man Fehler schickt. Die Release-Notizen schreibt das Skript („So bekommst du es“, „Braucht: Minecraft 26.3 · Fabric Loader ≥ 0.20.1 · …“, Tabelle mit der `.jar` und SHA-256).
+**Schritt 8 – README:** Deutsch oben, Englisch darunter: was die Mod macht (2–3 Sätze), was man braucht (Minecraft-Version, Loader, Pflicht-Mods, Programme), wie man sie bekommt: über den DasDimo Launcher (Link https://github.com/dasdimo/dasdimo-launcher-releases) – er legt sie ins Profil, hält sie aktuell und zeigt, was fehlt. Ob die README auch sagt „Wer Mods selbst verwaltet: die `.jar` aus dem neuesten Release“, entscheidet der Benutzer. Dazu die ausführliche Einrichtung der Zusatz-Programme (`guide_url` zeigt hierher), Lizenzen/Credits, an wen man Fehler schickt und ganz oben Mojangs Hinweis (siehe Schritt 2). Die Release-Notizen schreibt das Skript („So bekommst du es“, „Braucht: Minecraft 26.3 · Fabric Loader ≥ 0.20.1 · …“, Mojangs Hinweis, Tabelle mit der `.jar` und SHA-256).
 
 **Schritt 9 – Prüfen:** `check` zeigt die `.jar` und was ihre `fabric.mod.json` sagt (`id`, `version`, `depends`). Dazu `NOTE`-Zeilen – kein Fehler, aber anschauen: eine andere Version als das Release, oder eine Abhängigkeit aus `depends`, die `requires` nicht nennt (die sieht der Spieler dann nicht). `diff` sagt, ob die Spieler eine neue `.jar` laden.
 
@@ -572,7 +573,7 @@ Schritt 11 reicht nicht, denn dafür muss jemand angemeldet sein. Bitte den Benu
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 6, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 7, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
@@ -595,7 +596,7 @@ const crypto = require("crypto");
 const zlib = require("zlib");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 6;
+const HELPER_VERSION = 7;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -646,6 +647,8 @@ const GAME_TYPE = "game";
 const MOD_TYPE = "minecraft_mod";
 const MOD_MIN_LAUNCHER = "1.4.0";
 const MOD_MIN_SCREENSHOTS = 2;
+// Mojang's usage guidelines ask for this on every page about a Minecraft product.
+const MOD_NOTICE = "NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.";
 const JAR_RE = /^[0-9A-Za-z][0-9A-Za-z.+_-]{0,123}\.jar$/;
 const MAX_MOD_FILES = 4;
 const LOADERS = ["fabric", "quilt", "forge", "neoforge"];
@@ -1470,6 +1473,7 @@ function releaseNotes(cfg, manifest, test) {
 		lines.push("---", "");
 	}
 	if (manifest.minecraft) {
+		lines.push(MOD_NOTICE, "");
 		lines.push("| Datei / file | Loader | Minecraft | MB | SHA-256 |", "|---|---|---|---|---|");
 		for (const file of manifest.files) {
 			lines.push(`| ${file.path} | ${file.loader} | ${manifest.minecraft.version} | ${megabytes(file.size)} | \`${file.sha256}\` |`);
@@ -1800,6 +1804,7 @@ function commandCheck(cfg) {
 		problems.push(...discordImages(cfg, discordNews(cfg, baseVersion).images).problems.map((problem) => "discord: " + problem));
 	}
 	if (!fs.existsSync(rel(cfg.readme_file))) problems.push("README missing: " + cfg.readme_file);
+	else if (isMod(cfg) && !fs.readFileSync(rel(cfg.readme_file), "utf8").includes(MOD_NOTICE)) notes.push("README: Mojang's notice is missing: " + MOD_NOTICE);
 	problems.push(...catalogProblems(cfg));
 	for (const note of notes) console.log("NOTE    " + note);
 	for (const problem of problems) console.log("PROBLEM " + problem);
