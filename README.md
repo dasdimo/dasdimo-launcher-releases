@@ -24,6 +24,7 @@ Updates holt sich der Launcher selbst: Gibt es eine neue Version eines Spiels, s
 - **Minecraft-Mods:** Links unter „Mods“ stehen DasDimos Minecraft-Mods. Der Launcher legt die Mod in dein Minecraft-Profil (Minecraft Launcher, Modrinth App, NoRisk, CurseForge oder Prism), zeigt, was du dafür noch brauchst, und hält sie aktuell. Minecraft startest du wie gewohnt.
 - **Deinstallieren:** in den Einstellungen des Launchers (Zahnrad oben rechts) oder unter Windows **Einstellungen → Apps**. Dabei werden auch alle Spiele gelöscht; ihre Einstellungen und Spielstände bleiben, außer du wählst es anders.
 - **Etwas geht nicht?** Schick DasDimo die Datei `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\launcher.log`.
+- **DasDimo-Konto:** Mit einem freiwilligen Konto siehst du rechts deine Freunde und was sie spielen. Launcher und Einzelspieler gehen auch ohne. Mehr dazu unter [Datenschutz](DATENSCHUTZ.md).
 - Der Quellcode ist nicht öffentlich. Hier liegen nur die fertigen Versionen und die Spieleliste (`games.json`).
 
 Für die Claude-Agenten neuer Spiele und Mods: [INTEGRATION.md](INTEGRATION.md) erklärt, wie ein Spiel oder eine Minecraft-Mod in den Launcher kommt.
@@ -55,6 +56,7 @@ The launcher fetches updates by itself: when a game has a new version, the butto
 - **Minecraft mods:** DasDimo's Minecraft mods are listed on the left under “Mods”. The launcher puts a mod into your Minecraft profile (Minecraft Launcher, Modrinth App, NoRisk, CurseForge or Prism), shows what else you need for it and keeps it up to date. You start Minecraft as usual.
 - **Uninstall:** in the launcher's settings (gear at the top right) or in Windows **Settings → Apps**. This also deletes all games; their settings and saves stay unless you choose otherwise.
 - **Something does not work?** Send DasDimo the file `%LOCALAPPDATA%\DasDimo-Launcher\Launcher\launcher.log`.
+- **DasDimo account:** With an optional account you see your friends on the right and what they play. The launcher and single player work without it. More under [Privacy](DATENSCHUTZ.md#privacy-of-the-dasdimo-account).
 - The source code is not public. This repository only holds the finished versions and the game list (`games.json`).
 
 For the Claude agents of new games and mods: [INTEGRATION.md](INTEGRATION.md) explains how a game or a Minecraft mod gets into the launcher.
