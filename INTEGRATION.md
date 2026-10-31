@@ -1,7 +1,8 @@
 # Ein Spiel oder eine Minecraft-Mod in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels oder einer Minecraft-Mod von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 6 (2026-10-30) · Hilfs-Skript `dasdimo_release.js` Version 5 (Anhang).
+**Version der Anleitung:** 7 (2026-10-30) · Hilfs-Skript `dasdimo_release.js` Version 6, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
+**Neu in Version 7:** **DasDimo-Konto** (DasDimo Launcher ab 2.1.0): Ein Spiel kann erfahren, wer spielt, ohne eigene Anmeldung. Neues Feld `catalog.uses_account`, neuer Teil „DasDimo-Konto im Spiel“ (nach „Minecraft-Mods“). Das lohnt sich nur für Spiele mit Online-Funktionen und nur nach Rücksprache mit dem Benutzer. Alle anderen übernehmen nur das Skript aus dem Anhang.
 **Neu in Version 6:** **Neues Aussehen** (DasDimo Launcher ab 2.0.0): Das Cover füllt das ganze Fenster, das Logo steht groß über dem Knopf, die Neuigkeiten erscheinen als Karten unter dem Knopf. Die Hinweise zu `cover.jpg` und `logo.png` (Schritt 6) sind angepasst – ein Logo lohnt sich jetzt. Am Skript ändert sich nichts.
 **Neu in Version 5:** **Minecraft-Mods** (DasDimo Launcher ab 1.4.0): Eine Mod bekommt im Launcher eine eigene Seite, ein Klick legt die `.jar` in ein Minecraft-Profil, und die Seite zeigt, was man sonst noch braucht. Alles dazu im Teil „Minecraft-Mods“ (nach Schritt 13). Für Spiele ändert sich nichts – das Skript aus dem Anhang übernehmen genügt.
 **Neu in Version 4:** **Discord-Beitrag pro Version:** Nach `release` legt das Skript im Discord-Patch-Forum deines Spiels von selbst einen neuen Beitrag mit den deutschen Neuigkeiten und Bildern an – sobald der Benutzer für dein Spiel einen Webhook eingerichtet hat. Neuer Befehl `discord` (Abschnitt „Discord-Beitrag“ in Schritt 10). Schon eingerichtet? Skript aus dem Anhang übernehmen, sonst ändert sich nichts.
@@ -141,6 +142,7 @@ Mit einer einzelnen exe (Format 1) stehen in `files` stattdessen `{"arch": "x86_
 | `manifest_name` | optional, Standard `manifest.json`. Nur ändern, wenn der Benutzer es sagt (RIFTWAKE: `riftwake.json`), und danach nie mehr – `games.json` zeigt auf diesen Namen |
 | `news_file`, `readme_file` | Standardwerte wie oben; `out_dir` (Standard `builds/dasdimo-release`) für Manifest + Notizen |
 | `catalog.user_data_dirs` | Ordner aus Schritt 2, nur unter `%APPDATA%\`, `%LOCALAPPDATA%\`, `%USERPROFILE%\AppData\LocalLow\`. Werden nur gelöscht, wenn ein Spieler beim Deinstallieren „Auch Einstellungen löschen“ anhakt. Leer lassen (`[]`), wenn unklar |
+| `catalog.uses_account` | optional: `true`, wenn dein Spiel wissen soll, wer spielt (Teil „DasDimo-Konto im Spiel“). Sonst weglassen |
 | `catalog.status` | aus Schritt 1 |
 | `catalog.screenshots` | 0–8 Bilder für die Spielseite, in dieser Reihenfolge (Schritt 6). Leer lassen (`[]`) geht, sieht aber leer aus |
 
@@ -397,7 +399,7 @@ Ab **DasDimo Launcher 1.4.0** stehen auch die Minecraft-Mods des Benutzers im La
 | `mod.requires` | 0–12 Einträge, siehe nächste Tabelle, in der gewünschten Reihenfolge (Loader zuerst) |
 | `mod.sections` | aufklappbare Abschnitte mit festen `id`s (die Überschrift kommt vom Launcher): `first_steps` „Erste Schritte“ (offen), `commands` „Befehle“, `controls` „Steuerung“, `multiplayer` „Multiplayer“, `server` „Eigener Server“, `known_issues` „Bekannte Probleme“. `items`: 1–12 Zeilen `{de, en}`, mit `code` in Festbreitenschrift und mit Kopieren-Knopf. `commands` zeigt `code` links und den Text rechts als Tabelle |
 | `mod.guide_url` | optional: ausführliche Anleitung (z. B. die README im Release-Repo), Knopf „Anleitung öffnen“ |
-| `catalog` | wie bei Spielen, aber **ohne** `engine` und `user_data_dirs`; **mindestens 2** `screenshots` |
+| `catalog` | wie bei Spielen, aber **ohne** `engine`, `user_data_dirs` und `uses_account`; **mindestens 2** `screenshots` |
 
 Einträge in `mod.requires`:
 
@@ -467,6 +469,71 @@ Test mit dem Benutzer: denselben Befehl ohne `--mod-target`, `--auto-update` und
 
 **Schritt 13 – Neue Version:** Version in `gradle.properties` erhöhen, `news.json` ergänzen, `gradlew build` (und die Tests der Mod), dann `check`, `diff`, `discord --dry-run` und – nach Ja des Benutzers – `release`. Neue Texte für die Mod-Seite (z. B. ein neuer Befehl) stehen in `mod` und kommen mit dem nächsten Release; neue Bilder, Untertitel oder Status mit `register`.
 
+## DasDimo-Konto im Spiel
+Ab **DasDimo Launcher 2.1.0** können sich Spieler im Launcher mit einem DasDimo-Konto anmelden (Google oder Discord, freiwillig). Dein Spiel kann darüber erfahren, wer spielt: ohne eigene Anmeldung und ohne je einen Schlüssel des Kontos zu sehen. Das lohnt sich nur für Spiele mit Online-Funktionen. **Frag den Benutzer, bevor du es einbaust.**
+
+### So läuft es
+1. In `tools/dasdimo/dasdimo.json` steht unter `catalog` `"uses_account": true`, danach `register`. Ohne dieses Feld bekommt dein Spiel nichts.
+2. Der Launcher startet dein Spiel mit zwei Argumenten: `--dasdimo-port=<port>` und `--dasdimo-ticket=<ticket>`. Das Ticket gilt nur für dein Spiel und nur, solange es läuft. Gestartet wird immer, auch wenn niemand angemeldet oder jemand gesperrt ist.
+3. Braucht dein Spiel den Spieler, fragt es den Launcher nach einem **Ausweis**. Der gilt einmal, 5 Minuten lang, nur für dein Spiel.
+4. Dein Spiel schickt den Ausweis an **deinen eigenen Server**. Der prüft ihn und weiß dann, wer da ist.
+
+### Den Launcher fragen
+**Godot:** `tools/dasdimo/dasdimo_account.gd` aus dem Anhang unverändert kopieren. Die Hilfs-Datei übernimmt alles:
+
+```gdscript
+var answer := await DasDimoAccount.ask_launcher(self)
+if answer.ok:
+	my_server.join(answer.pass)
+else:
+	show_hint(answer.error)
+```
+
+**Andere Engines:** eine HTTP-Anfrage ohne `Origin`-Kopfzeile, sonst lehnt der Launcher ab:
+
+```
+GET http://127.0.0.1:<port>/v1/pass
+Host: 127.0.0.1:<port>
+Authorization: Bearer <ticket>
+```
+
+Die Antwort ist immer JSON mit `ok`, im guten Fall `{"ok": true, "pass": "<64 Zeichen>", "expires_in": 300, "id": "<Kennung>", "name": "Timo"}`, sonst mit `error`:
+
+| `error` | Bedeutung | Was dein Spiel tut |
+|---|---|---|
+| `no_launcher` | Nicht über den Launcher gestartet, Launcher älter als 2.1.0 oder geschlossen. Das meldet nur die Hilfs-Datei; ohne sie fehlen die Argumente oder die Verbindung klappt nicht | Hinweis: über den DasDimo Launcher starten |
+| `not_signed_in` | Niemand angemeldet | Hinweis: im Launcher anmelden |
+| `no_name` | Angemeldet, aber noch ohne Namen | Hinweis: im Launcher einen Namen wählen |
+| `banned` | Gesperrt, dazu `scope`, `reason` und `ends_at` (`null` = kein Ende) | Online-Teil zu, Grund und Ende zeigen |
+| `offline` | Konto-Server nicht erreichbar | Später noch einmal versuchen |
+| `rate_limited` | Mehr als 60 Ausweise in einer Stunde | Später noch einmal versuchen und prüfen, warum es so viele sind |
+
+### Den Ausweis prüfen (auf deinem Server)
+
+```
+POST https://kvbawsoaryxhosnlsmre.supabase.co/rest/v1/rpc/game_pass_check
+apikey: sb_publishable_K4auNqWdSg9aJzWKjZCwWw_ftxDfrMS
+Content-Type: application/json
+
+{"pass": "<Ausweis>", "game": "<game_id>"}
+```
+
+Dieser Schlüssel ist öffentlich, dein Server braucht kein Geheimnis. Die Antwort ist `{"ok": true, "id": "<Kennung>", "name": "Timo"}` oder `{"ok": false, "error": "not_found"}`. `not_found` heißt: falsch, schon benutzt, abgelaufen, für ein anderes Spiel, oder die Person ist inzwischen gesperrt. Die Prüfung **verbraucht** den Ausweis, auch wenn sie scheitert.
+
+Die `id` bleibt für ein Konto immer gleich. Nimm sie für Fortschritt und Listen, denn der `name` kann sich ändern.
+
+### Regeln
+- **Der Ausweis geht nur an deinen eigenen Server.** Nie an andere Mitspieler: Wer ihn hat, kann sich damit einmal als dieser Spieler ausgeben. Ohne eigenen Server gibst du ihn nicht weiter und klärst mit dem Benutzer, wie es gehen soll.
+- **Der Ausweis reist nur verschlüsselt** (TLS oder DTLS). Die Prüfung braucht kein Geheimnis: Wer den Ausweis unterwegs mitliest, kann ihn selbst einlösen, bevor er bei deinem Server ankommt.
+- Ausweis und Ticket gehören nie in Logs, Absturzberichte, Dateien oder auf den Bildschirm.
+- `name` und `id` aus der Antwort des Launchers sind nur zum Anzeigen. Entscheiden darf nur die Prüfung auf deinem Server, denn ein Spiel lässt sich fälschen.
+- Hol den Ausweis erst, wenn du ihn brauchst, nicht auf Vorrat.
+- Eine Sperre schließt nur Online-Funktionen. Einzelspieler bleibt offen.
+- Dein Spiel fragt nie selbst nach Google, Discord oder Passwörtern.
+
+### Test
+Schritt 11 reicht nicht, denn dafür muss jemand angemeldet sein. Bitte den Benutzer, sich im Launcher anzumelden, und prüfe drei Fälle: angemeldet → `ok`, abgemeldet → `not_signed_in`, exe direkt gestartet → `no_launcher`.
+
 ## Fehlerhilfe
 | Meldung | Lösung |
 |---|---|
@@ -496,6 +563,8 @@ Test mit dem Benutzer: denselben Befehl ohne `--mod-target`, `--auto-update` und
 | Mod: `catalog.screenshots: a mod needs at least 2` | mindestens 2 Screenshots (Teil „Minecraft-Mods“, Schritt 6) |
 | Mod: `NOTE … depends on '…'` | Die Mod braucht noch etwas, das `requires` nicht nennt – ergänzen, oder bewusst weglassen (z. B. eine eingebaute Bibliothek) |
 | Launcher: Mod erscheint nicht | Launcher älter als 1.4.0 (aktualisiert sich selbst), oder der Eintrag hat weniger als 2 Screenshots (`launcher.log`: `skipped`) |
+| Konto: immer `no_launcher` | `uses_account` fehlt im Eintrag (`register` vergessen, oder `games.json` noch im Zwischenspeicher), oder die exe wurde direkt gestartet |
+| Konto: `401` vom Launcher | Das Ticket gilt nicht mehr: Das Spiel wurde neu gestartet, ohne dass der Launcher es wusste |
 
 ---
 
@@ -503,7 +572,7 @@ Test mit dem Benutzer: denselben Befehl ohne `--mod-target`, `--auto-update` und
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 5, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 6, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
@@ -526,7 +595,7 @@ const crypto = require("crypto");
 const zlib = require("zlib");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 5;
+const HELPER_VERSION = 6;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -718,12 +787,14 @@ function catalogProblems(cfg) {
 	if (isMod(cfg)) {
 		if (c.engine !== undefined) problems.push("catalog.engine: not for a mod (its page shows Minecraft, loader and Java)");
 		if (c.user_data_dirs !== undefined) problems.push("catalog.user_data_dirs: not for a mod - its settings live in the Minecraft profile");
+		if (c.uses_account !== undefined) problems.push("catalog.uses_account: not for a mod - the launcher does not start it");
 	} else {
 		if (typeof c.engine !== "string" || !c.engine.trim()) problems.push("catalog.engine missing (e.g. \"Godot 4.5\")");
 		if (!Array.isArray(c.user_data_dirs) || c.user_data_dirs.some((dir) => !DATA_DIR_RE.test(dir))) {
 			problems.push("catalog.user_data_dirs: list of folders below %APPDATA%\\, %LOCALAPPDATA%\\ or %USERPROFILE%\\AppData\\LocalLow\\ (may be empty)");
 		}
 	}
+	if (c.uses_account !== undefined && typeof c.uses_account !== "boolean") problems.push("catalog.uses_account: true or false");
 	if (!STATUSES.includes(c.status)) problems.push("catalog.status: testing, released or hidden");
 	for (const [key, rule] of Object.entries(PICTURES)) {
 		const file = c[key];
@@ -1880,6 +1951,7 @@ function commandRegister(cfg, args) {
 		local.screenshots = shots.map((shot) => ({ url: shot.local, sha256: shot.sha256 }));
 	}
 	if (!isMod(cfg)) entry.user_data_dirs = local.user_data_dirs = c.user_data_dirs;
+	if (c.uses_account === true) entry.uses_account = local.uses_account = true;
 	const hubFile = getFile(HUB_REPO, CATALOG_FILE);
 	if (!hubFile && !args.dryRun) fail(`${HUB_REPO}/${CATALOG_FILE} not found`);
 	const catalog = hubFile ? JSON.parse(hubFile.content.toString("utf8")) : { format: 1, games: [] };
@@ -1986,4 +2058,62 @@ async function main() {
 // tools/discord/test_discord.js loads the functions without running a command.
 if (require.main === module) main().catch((error) => fail(error.message));
 else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, allowedLink, jarInfo, LAUNCHER_PAGE };
+```
+
+---
+
+## Anhang – `tools/dasdimo/dasdimo_account.gd`
+Nur für Godot-Spiele, die das DasDimo-Konto nutzen. Unverändert kopieren.
+
+```gdscript
+class_name DasDimoAccount
+extends RefCounted
+## Asks the DasDimo Launcher who plays (account helper version 1, from INTEGRATION.md). Copy this file unchanged.
+##
+##     var answer := await DasDimoAccount.ask_launcher(self)
+##     if answer.ok:
+##         my_server.join(answer.pass)
+##
+## ok = true:  pass (good once, for five minutes, for this game only), expires_in, id, name.
+## ok = false: error, one of the ERROR_ constants. With ERROR_BANNED also scope, reason and ends_at (null = no end).
+## The game always starts: without an answer only its online features stay closed.
+
+const ERROR_NO_LAUNCHER := "no_launcher" ## Not started by the launcher, or the launcher was closed.
+const ERROR_NOT_SIGNED_IN := "not_signed_in"
+const ERROR_NO_NAME := "no_name" ## Signed in, but no name chosen yet.
+const ERROR_BANNED := "banned"
+const ERROR_OFFLINE := "offline"
+const ERROR_RATE_LIMITED := "rate_limited" ## More than 60 passes in an hour.
+const TIMEOUT := 15.0
+
+
+## False: the game was not started by the launcher, or its entry has no uses_account.
+static func started_by_launcher() -> bool:
+	return not _argument("--dasdimo-port=").is_empty() and not _argument("--dasdimo-ticket=").is_empty()
+
+
+## Needs a node in the tree for the moment of the request. Never log or show the pass.
+static func ask_launcher(parent: Node) -> Dictionary:
+	if not started_by_launcher():
+		return {"ok": false, "error": ERROR_NO_LAUNCHER}
+	var http := HTTPRequest.new()
+	http.timeout = TIMEOUT
+	parent.add_child(http)
+	var url := "http://127.0.0.1:%d/v1/pass" % _argument("--dasdimo-port=").to_int()
+	if http.request(url, ["Authorization: Bearer " + _argument("--dasdimo-ticket=")]) != OK:
+		http.queue_free()
+		return {"ok": false, "error": ERROR_NO_LAUNCHER}
+	var result: Array = await http.request_completed
+	http.queue_free()
+	var answer: Variant = JSON.parse_string((result[3] as PackedByteArray).get_string_from_utf8())
+	if result[0] != HTTPRequest.RESULT_SUCCESS or result[1] != 200 or not answer is Dictionary or not answer.get("ok") is bool:
+		return {"ok": false, "error": ERROR_NO_LAUNCHER}
+	return answer
+
+
+static func _argument(prefix: String) -> String:
+	for argument in OS.get_cmdline_args():
+		if argument.begins_with(prefix):
+			return argument.trim_prefix(prefix)
+	return ""
 ```
