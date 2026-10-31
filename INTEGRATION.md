@@ -1,7 +1,8 @@
 # Ein Spiel oder eine Minecraft-Mod in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels oder einer Minecraft-Mod von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 10 (2026-10-31) · Hilfs-Skript `dasdimo_release.js` Version 8, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
+**Version der Anleitung:** 11 (2026-10-31) · Hilfs-Skript `dasdimo_release.js` Version 9, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
+**Neu in Version 11:** **Jede Patchnotiz braucht ein Bild** (feste Regel des Benutzers): `banner` ist für die neue Version jetzt Pflicht und muss zeigen, was sich wirklich geändert hat (Schritt 8, „Bild zur Patchnotiz“). `check`, `diff`, `manifest` und `release` stoppen ohne Bild oder mit einem wiederverwendeten Bild, ältere Versionen bleiben unberührt. Das Bild steht jetzt auch vorn im Discord-Beitrag und oben auf der Release-Seite. Skript aus dem Anhang übernehmen. Mit eigenem Release-Skript baust du die Prüfung selbst ein (Schritt 8).
 **Neu in Version 10:** **Logo wieder groß** (DasDimo Launcher ab 2.2.1): Auf der Übersicht steht das Logo groß über Abzeichen und Untertitel, klein in der Titelleiste nur noch auf den anderen Reitern (Schritt 6). Am Skript ändert sich nichts.
 **Neu in Version 9:** **Reiter und Patchnotizen wie ein Artikel** (DasDimo Launcher ab 2.2.0): Oben liegen die Reiter „Übersicht“, „Patchnotizen“, „Bilder“ und bei Mods „Anleitung“. Eine Version in `news.json` kann jetzt Titel, Untertitel, Art des Updates, Autor, ein Bild und Abschnitte mit Listen haben (Schritt 8). Das ist freiwillig, das alte Format läuft weiter. Das Logo steht jetzt klein in der Titelleiste (Schritt 6). `check` und `release` stoppen, wenn Neuigkeiten fehlerhaft oder zu lang sind. Skript aus dem Anhang übernehmen, sonst ändert sich nichts.
 **Neu in Version 7:** **DasDimo-Konto** (DasDimo Launcher ab 2.1.0): Ein Spiel kann erfahren, wer spielt, ohne eigene Anmeldung. Neues Feld `catalog.uses_account`, neuer Teil „DasDimo-Konto im Spiel“ (nach „Minecraft-Mods“). Das lohnt sich nur für Spiele mit Online-Funktionen und nur nach Rücksprache mit dem Benutzer. Alle anderen übernehmen nur das Skript aus dem Anhang.
@@ -37,6 +38,7 @@ Das Hilfs-Skript im Anhang erledigt Manifest, Release, Bilder und Eintrag. Du sc
 6. **Nur fertige Builds öffentlich:** kein Quellcode, keine Zugangsdaten/Schlüssel, keine Rohdateien von Assets, die nicht weitergegeben werden dürfen (z. B. Mixamo-FBX). In einer fertigen exe oder einem Paket (`.pck`) eingebaut ist in Ordnung.
 7. **Nur dein eigener Eintrag:** Ändere in `games.json` nie andere Spiele (das Skript ändert nur den Eintrag mit deiner `game_id`). Am Launcher-Code arbeitest du nicht; Wünsche oder Fehler am Launcher meldest du dem Benutzer.
 8. `builds/` und `builds/dasdimo-release/` nicht ins Git deines Spiels committen. PowerShell-Skripte (`.ps1`) nur mit ASCII-Zeichen schreiben (Windows PowerShell 5.1).
+9. **Jede Patchnotiz hat ein passendes Bild:** Es zeigt, was sich wirklich geändert hat, und du zeigst es dem Benutzer vor dem Release (Schritt 8, „Bild zur Patchnotiz“).
 
 ## Werkzeuge
 - **GitHub CLI** `gh`, angemeldet als `dasdimo` (`gh auth status`). Auf dem PC des Benutzers: `C:\Program Files\GitHub CLI\gh.exe`.
@@ -181,7 +183,7 @@ Das Skript schreibt pro Release diese Datei (`manifest.json` oder `manifest_name
 		{"path": "packs/textures.pck", "arch": "all", "size": 31000000, "sha256": "…", "url": "…/v0.2.0/77fe0a1c3b42-textures.pck"}
 	],
 	"news": [
-		{"version": "0.2.0", "date": "2026-11-15", "entries": [{"de": "Neue Karte: Hafen.", "en": "New map: Harbour."}]}
+		{"version": "0.2.0", "date": "2026-11-15", "banner": {"url": "https://raw.githubusercontent.com/dasdimo/beispielspiel-releases/main/launcher/patch-0.2.0.jpg", "sha256": "…"}, "entries": [{"de": "Neue Karte: Hafen.", "en": "New map: Harbour."}]}
 	]
 }
 ```
@@ -198,7 +200,7 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 | `files[].kind`, `files[].name` | Format 1: `kind` immer `game` (`launcher` und `setup` gibt es nur in der Zentrale und für den Wechsel vom alten RIFTWAKE-Launcher); `name` = Dateiname ohne Pfad, beginnt mit Buchstabe/Ziffer, dann nur `A–Z a–z 0–9 . _ -`, endet auf `.exe` |
 | `files[].size`, `sha256` | Bytes (mehr als 0) und SHA-256 (64 Hex-Zeichen). Der Launcher prüft beides nach dem Download und erkennt daran, was sich geändert hat |
 | `files[].url` | voller Link zur Datei im Release (`https://github.com/dasdimo/…`). Format 2: Name im Release = die ersten 12 Zeichen der SHA-256 + Dateiname, weil GitHub keine Ordner kennt und beide Plattformen eine `Beispielspiel.exe` haben |
-| `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN. Optional pro Version `title`, `subtitle`, `kind`, `author`, `banner` (`{"url", "sha256"}`) und `sections` (Schritt 8); `entries` bleibt immer drin, ältere Launcher lesen nur das |
+| `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN. Die neue Version hat immer ein `banner` (`{"url", "sha256"}`). Optional pro Version `title`, `subtitle`, `kind`, `author` und `sections` (Schritt 8); `entries` bleibt immer drin, ältere Launcher lesen nur das |
 | `launcher_version` | bei Spielen immer `""` |
 | `min_launcher` | optional: die älteste DasDimo-Launcher-Version, mit der diese Spielversion installiert und gespielt werden darf, z. B. `"1.1.0"` (wie `version`, ohne `v`). Ist der Launcher älter, sperrt er „Aktualisieren“ und „Spielen“ (auch die installierte Version) und zeigt „Launcher aktualisieren“; ohne Internet bleibt die installierte Version spielbar. Gilt ab Launcher 1.1.1, ältere ignorieren das Feld. Nur setzen, wenn das Spiel wirklich einen neueren Launcher braucht. Das Hilfs-Skript schreibt es bei Spielen nicht – bei Bedarf beim Benutzer melden (bei Mods immer `1.4.0`) |
 
@@ -206,16 +208,16 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 **`tools/dasdimo/news.json`** – alle Versionen, neueste zuerst. Das Skript nimmt die letzten 3 (Versionen mit `-`, z. B. `0.3.0-dev2`, werden ausgelassen, außer es ist die gerade veröffentlichte). Mehrere Blöcke mit gleicher Version werden zusammengefasst.
 ```json
 [
-	{"version": "0.2.0", "date": "2026-11-15", "entries": [
+	{"version": "0.2.0", "date": "2026-11-15", "banner": "tools/dasdimo/news_images/0.2.0-banner.jpg", "entries": [
 		{"de": "Neue Figur: Die Wirtin.", "en": "New character: The innkeeper."},
 		{"de": "Runden gehen schneller.", "en": "Rounds are faster."}
 	]},
 	{"version": "0.1.0", "date": "2026-10-28", "entries": [{"de": "Erste Version zum Testen.", "en": "First version for testing."}]}
 ]
 ```
-Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im Spiel merkt). Hat dein Projekt schon ein Änderungsprotokoll, übernimm daraus – oder lass dir vom Benutzer sagen, was drinstehen soll.
+Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im Spiel merkt). Hat dein Projekt schon ein Änderungsprotokoll, übernimm daraus – oder lass dir vom Benutzer sagen, was drinstehen soll. Jede neue Version braucht außerdem ein Bild (`banner`, siehe „Bild zur Patchnotiz“ weiter unten).
 
-**Patchnotizen als Artikel (freiwillig, ab Launcher 2.2.0):** Im Reiter „Patchnotizen“ steht jede Version als Artikel mit Bild, großem Titel und Abschnitten. Ohne die neuen Felder erzeugt der Launcher einen Titel aus Spielname und Version und zeigt `entries` als einfache Liste. Mit ihnen sieht eine Version so aus:
+**Patchnotizen als Artikel (ab Launcher 2.2.0):** Im Reiter „Patchnotizen“ steht jede Version als Artikel mit Bild, großem Titel und Abschnitten. Das Bild ist Pflicht, alle anderen Felder sind freiwillig: Ohne sie erzeugt der Launcher einen Titel aus Spielname und Version und zeigt `entries` als einfache Liste. Mit allen Feldern sieht eine Version so aus:
 ```json
 [
 	{
@@ -244,13 +246,38 @@ Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im S
 | `title`, `kind` | DE **und** EN, je höchstens 120 Zeichen. `kind` ist die Art des Updates in der Zeile unter dem Titel, Standard „Spielaktualisierung“ oder „Mod-Aktualisierung“ |
 | `subtitle` | DE **und** EN, höchstens 500 Zeichen |
 | `author` | ein Name, höchstens 60 Zeichen, Standard `DasDimo` |
-| `banner` | Pfad im Repo deines Spiels, JPEG, höchstens 1920×1080 und 800 KB. Am besten breit (etwa 3:1), die Mitte bleibt immer sichtbar. `release` lädt es vor dem Manifest nach `launcher/patch-<version>.jpg`, im Manifest steht dann Adresse + SHA-256. Keine persönlichen Daten im Bild |
+| `banner` | **Pflicht für die neue Version**, siehe „Bild zur Patchnotiz“. Pfad im Repo deines Spiels, JPEG, höchstens 1920×1080 und 800 KB. Am besten breit (etwa 3:1), die Mitte bleibt immer sichtbar. `release` lädt es vor dem Manifest nach `launcher/patch-<version>.jpg`, im Manifest steht dann Adresse + SHA-256. Keine persönlichen Daten im Bild |
 | `sections` | höchstens 16 Abschnitte, Titel optional. Eine Zeile (DE **und** EN, höchstens 500 Zeichen) kann unter `items` eine eigene Liste haben, insgesamt höchstens 3 Ebenen und 300 Zeilen pro Version |
 | `entries` | darf bei einem Artikel fehlen: Das Skript füllt sie aus den obersten Zeilen der Abschnitte, damit ältere Launcher und der Discord-Beitrag etwas zu zeigen haben |
 
 Mehrere Blöcke mit gleicher Version: `entries` werden zusammengefasst, bei den neuen Feldern gilt der erste Block. Alles ist nur Text, Formatierungen wie `[b]` oder `**` zeigt der Launcher wörtlich.
 
-Optional pro Version: **Bilder für den Discord-Beitrag**, z. B. `"images": ["tools/dasdimo/news_images/0.2.0-wirtin.jpg"]` (Pfade im Repo deines Spiels, `.jpg`/`.png`/`.webp`/`.gif`, höchstens 4 pro Version, zusammen höchstens 8 MB). Sie gehen nur nach Discord, nicht ins Manifest und nicht in den Launcher. Ohne `images` zeigt der Beitrag das Cover und die ersten 3 Screenshots aus `catalog`. Auf den Bildern dürfen keine persönlichen Daten stehen (z. B. Ordner mit dem Windows-Namen des Benutzers).
+**Bild zur Patchnotiz (Pflicht):** Jede neue Version bekommt ein eigenes Bild, das zeigt, was sich wirklich geändert hat. Das ist eine feste Regel des Benutzers und gilt für Spiele, Mods und den Launcher selbst.
+
+| Was neu ist | Was das Bild zeigt |
+|---|---|
+| neue Karte | genau diese Karte |
+| neue Figur oder neuer Agent | genau diese Figur |
+| neue Funktion oder neues Menü | die neue Stelle im Spiel |
+| Mod-Update | die neue Funktion im Spiel |
+| nur Fehlerbehebungen | die Stelle, an der der Fehler auftrat. Gibt es nichts zu zeigen, frag den Benutzer |
+
+Nicht erlaubt sind das Cover, das Logo, das Icon, ein vorhandener Screenshot deiner Seite, das Bild einer früheren Version und allgemeine Werbebilder oder Platzhalter. Das Skript erkennt dieselbe Datei und stoppt. Ein neuer Screenshot darf die Vorlage sein, das Bild ist dann ein eigener Zuschnitt.
+
+So erstellst du es:
+1. Nimm es aus dem echten Stand dieser Version auf: Screenshot aus dem fertigen Build oder Bild aus der Engine, nichts Erfundenes.
+2. Schneide es breit zu, am besten etwa 3:1 (z. B. 1800×600), mit dem Wichtigen in der Mitte.
+3. Speichere es als JPEG nach `tools/dasdimo/news_images/<version>-banner.jpg`, höchstens 1920×1080 und 800 KB. Keine persönlichen Daten, keine Debug-Anzeigen.
+4. Trag es bei der neuen Version ein: `"banner": "tools/dasdimo/news_images/<version>-banner.jpg"`.
+5. Zeig es dem Benutzer vor dem Release. Ob ein Bild passt, sieht nur ein Mensch, das Skript prüft nur die Datei.
+
+`release` lädt das Bild vor dem Manifest nach `launcher/patch-<version>.jpg` in dein Release-Repo, also nach `https://raw.githubusercontent.com/dasdimo/<spiel-id>-releases/…`. Der Launcher zeigt Bilder nur von dort. Es erscheint oben im Reiter „Patchnotizen“, auf der Karte der Übersicht, als erstes Bild im Discord-Beitrag und oben auf der Release-Seite.
+
+Ohne Bild stoppen `check`, `diff`, `manifest` und `release`. Ältere Versionen musst du nicht nachrüsten, dort zeigt der Launcher weiter das Spielbild. Test-Releases (`--suffix`) und Versionen mit `-` brauchen kein Bild.
+
+**Eigenes Release-Skript:** Schreibt dein Projekt das Manifest selbst, greift die Prüfung des Hilfs-Skripts dort nicht von allein. Dein Skript muss dann vor dem Upload stoppen, wenn das Bild fehlt, es vor dem Manifest nach `launcher/patch-<version>.jpg` hochladen (GitHub-API, noreply-Adresse) und `banner` als `{"url", "sha256"}` in `news` schreiben. Damit `diff` und `discord` laufen, gehört der Bild-Pfad auch in die Datei unter `news_file`.
+
+Optional pro Version: **Weitere Bilder für den Discord-Beitrag**, z. B. `"images": ["tools/dasdimo/news_images/0.2.0-wirtin.jpg"]` (Pfade im Repo deines Spiels, `.jpg`/`.png`/`.webp`/`.gif`, mit dem `banner` höchstens 4 pro Version, zusammen höchstens 8 MB). Sie gehen nur nach Discord, nicht ins Manifest und nicht in den Launcher. Das `banner` steht dort immer an erster Stelle. Nur eine ältere Version ohne beides zeigt das Cover und die ersten 3 Screenshots aus `catalog`. Auf den Bildern dürfen keine persönlichen Daten stehen (z. B. Ordner mit dem Windows-Namen des Benutzers).
 
 **`tools/dasdimo/README.md`** – Startseite des Release-Repos, Deutsch oben, Englisch darunter: was das Spiel ist (2 Sätze), wie man es bekommt (**nur** über den DasDimo Launcher: Link https://github.com/dasdimo/dasdimo-launcher-releases, dort den Installer `DasDimoLauncher-Setup.exe` laden – keine direkten Links auf Spiel-Dateien), SmartScreen-Hinweis für den Installer („Weitere Informationen“ → „Trotzdem ausführen“, die Datei ist nicht signiert), wo Einstellungen liegen, an wen man Fehler schickt. Der Quellcode ist nicht öffentlich – das kurz erwähnen.
 
@@ -290,7 +317,7 @@ Nach `RELEASE OK` legt das Skript im Discord-Patch-Forum deines Spiels einen **n
 - Ohne Webhook für deine `game_id` steht nach dem Release nur ein Hinweis (`note: no Discord webhook …`), kein Fehler.
 - Vorher ansehen (postet nichts): `node tools/dasdimo/dasdimo_release.js discord --dry-run`. Zeig dem Benutzer den Text, wenn du ihn nach dem Ja zum Release fragst – das Ja gilt dann für Release und Beitrag. Will er keinen Beitrag: `release --no-discord`.
 - Einzeln posten – wenn es nach dem Release nicht klappte (`DISCORD NOT POSTED: …`) oder wenn dein Spiel ein eigenes Release-Skript hat (dann direkt nach dessen Release aufrufen): `node tools/dasdimo/dasdimo_release.js discord`. Die Version kommt aus `version`/`version_file`, mit `--version 0.4.0` eine bestimmte. Eine Version, die schon gepostet wurde, wird übersprungen (gemerkt in `%APPDATA%\DasDimo\discord_posts.json`); `--again` postet sie noch einmal – nur nach Ja des Benutzers.
-- **Bilder:** Unter der Liste zeigt der Beitrag die Bilder der Version (`images` in `news.json`, Schritt 8) als Galerie, sonst das Cover und die ersten 3 Screenshots. Der Probelauf nennt jedes Bild (`picture 1-cover.jpg (386 KB): …`). Fehlt ein Bild oder ist es zu groß, wird es weggelassen (`note: picture …`), der Beitrag kommt trotzdem; `check` meldet es vorher als `PROBLEM discord: …`.
+- **Bilder:** Unter der Liste zeigt der Beitrag als Galerie zuerst das Bild der Patchnotiz (`banner`), dann die übrigen Bilder der Version (`images` in `news.json`, Schritt 8). Nur eine ältere Version ohne beides zeigt das Cover und die ersten 3 Screenshots. Der Probelauf nennt jedes Bild (`picture 1-cover.jpg (386 KB): …`). Fehlt ein Bild oder ist es zu groß, wird es weggelassen (`note: picture …`), der Beitrag kommt trotzdem; `check` meldet es vorher als `PROBLEM discord: …`.
 - Stehen deine Neuigkeiten nicht in `news.json` (eigenes Release-Skript), gib die Datei mit: `discord --news <datei>`. Das kann eine Liste wie `news.json` sein oder dein gerade gebautes Spiel-Manifest (dessen `news`).
 - Am Ende steht `DISCORD OK: <Link zum Beitrag>`. Den Link nennst du im Bericht.
 
@@ -328,7 +355,7 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 
 ## Schritt 13 – Festhalten und Bericht
 1. Im eigenen Projekt dokumentieren (z. B. `CLAUDE.md`/Übergabe-Datei): Release-Repo, `tools/dasdimo/`, Ablauf „Neue Version veröffentlichen“:
-   1. Version im Projekt erhöhen, `news.json` ergänzen (DE+EN).
+   1. Version im Projekt erhöhen, `news.json` ergänzen (DE+EN), Bild zur Patchnotiz erstellen und dem Benutzer zeigen (Schritt 8).
    2. Builds x64 + ARM64 bauen, Tests deines Spiels grün.
    3. `node tools/dasdimo/dasdimo_release.js check`, dann `diff` (dem Benutzer die MB nennen) und `discord --dry-run` (den Discord-Text zeigen), dann `release` (nur wenn der Benutzer veröffentlichen will) – der Discord-Beitrag kommt danach von selbst.
    4. Test-Release zum Ausprobieren: `release --suffix test1` → Version `<version>-test1` wird „latest“. Danach mit OK des Benutzers löschen: `gh release delete v<version>-test1 -R dasdimo/<game_id>-releases --cleanup-tag --yes` – dann ist wieder das vorige Release aktuell.
@@ -505,7 +532,7 @@ Test mit dem Benutzer: denselben Befehl ohne `--mod-target`, `--auto-update` und
 
 **Schritt 12 – Eintragen:** wie bei Spielen. `register` trägt `"type": "minecraft_mod"` und beide Plattformen ein. Launcher bis 1.3.x überspringen den Eintrag.
 
-**Schritt 13 – Neue Version:** Version in `gradle.properties` erhöhen, `news.json` ergänzen, `gradlew build` (und die Tests der Mod), dann `check`, `diff`, `discord --dry-run` und – nach Ja des Benutzers – `release`. Neue Texte für die Mod-Seite (z. B. ein neuer Befehl) stehen in `mod` und kommen mit dem nächsten Release; neue Bilder, Untertitel oder Status mit `register`.
+**Schritt 13 – Neue Version:** Version in `gradle.properties` erhöhen, `news.json` samt Bild ergänzen (die neue Funktion im Spiel, Schritt 8), `gradlew build` (und die Tests der Mod), dann `check`, `diff`, `discord --dry-run` und – nach Ja des Benutzers – `release`. Neue Texte für die Mod-Seite (z. B. ein neuer Befehl) stehen in `mod` und kommen mit dem nächsten Release; neue Bilder, Untertitel oder Status mit `register`.
 
 ## DasDimo-Konto im Spiel
 Ab **DasDimo Launcher 2.1.0** können sich Spieler im Launcher mit einem DasDimo-Konto anmelden (Google oder Discord, freiwillig). Dein Spiel kann darüber erfahren, wer spielt: ohne eigene Anmeldung und ohne je einen Schlüssel des Kontos zu sehen. Das lohnt sich nur für Spiele mit Online-Funktionen. **Frag den Benutzer, bevor du es einbaust.**
@@ -584,6 +611,8 @@ Schritt 11 reicht nicht, denn dafür muss jemand angemeldet sein. Bitte den Benu
 | `no file of its own` | x64- und ARM64-Ordner sind gleich – nur `x86_64` eintragen |
 | `WARNING: the start file … changed` | Abschnitt „Spiel aus mehreren Dateien“, Punkt 1 (nach einem Engine-Update normal) |
 | `news: no entry for <version>` | `news.json` für die neue Version ergänzen |
+| `news <version>: needs a banner` | Das Bild zur neuen Version fehlt (Schritt 8, „Bild zur Patchnotiz“) |
+| `news <version> banner: the same picture as …` | Das Bild ist das Cover, ein Screenshot oder das Bild einer anderen Version: Nimm ein eigenes Bild dieser Version |
 | `catalog.cover … must be 1920x1080` | Bild in genau dieser Größe neu speichern (gilt auch für `catalog.screenshots[…]`) |
 | `… has no release yet` | erst Schritt 10, dann `register` |
 | Launcher: „Manifest ungültig“ | `launcher.log` lesen; meist ein Dateiname mit Leerzeichen/Umlaut oder eine Version mit `v` |
@@ -610,7 +639,7 @@ Schritt 11 reicht nicht, denn dafür muss jemand angemeldet sein. Bitte den Benu
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 8, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 9, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
@@ -633,7 +662,7 @@ const crypto = require("crypto");
 const zlib = require("zlib");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 8;
+const HELPER_VERSION = 9;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
@@ -667,7 +696,7 @@ const PICTURES = {
 // Pictures of the demo page (catalog.screenshots), shown in this order.
 const SCREENSHOT = { type: "jpg", width: 1920, height: 1080, maxKb: 800 };
 const MAX_SCREENSHOTS = 8;
-// The picture on top of a patch note.
+// The picture on top of a patch note, every released version needs one (releasedBannerProblems).
 const BANNER = { type: "jpg", maxWidth: 1920, maxHeight: 1080, maxKb: 800 };
 const LAUNCHER_PAGE = `https://github.com/${HUB_REPO}`;
 // Discord: one forum post per version through the forum's webhook. The webhook addresses are secret and live only
@@ -1399,6 +1428,29 @@ function noteSections(list, label, problems) {
 	return sections;
 }
 
+// What is wrong with the banner of a news block, "" when it is fine.
+function bannerProblem(banner) {
+	return typeof banner === "string" && banner.trim() ? pictureProblem(rel(banner.trim()), BANNER) : "must be a JPEG file";
+}
+
+// Every released version shows what really changed; older notes and test versions stay as they are. `group` is the
+// version in the news, `general` the pictures that never count (cover, screenshots). A script only sees that the
+// file is a new one, whether the picture fits stays a person's call.
+function releasedBannerProblems(list, version, group, general) {
+	if (version.includes("-")) return [];
+	if (!list.some((block) => block && block.version === version && block.banner !== undefined)) {
+		return [`news ${version}: needs a banner, a picture of what changed (INTEGRATION.md, step 8)`];
+	}
+	if (!group || !group.banner) return [];
+	const picture = sha256File(rel(group.banner));
+	const others = list.filter((block) => block && String(block.version).split("-")[0] !== version).map((block) => block.banner).concat(general);
+	const same = others.filter((file) => typeof file === "string" && file.trim()).find((file) => {
+		const full = rel(file.trim());
+		return fs.existsSync(full) && fs.statSync(full).isFile() && sha256File(full) === picture;
+	});
+	return same ? [`news ${version} banner: the same picture as ${same}, it must show this update`] : [];
+}
+
 // What makes a version an article. Several blocks of one version: the first one decides.
 function noteExtras(block, group, problems) {
 	const label = "news " + block.version;
@@ -1415,7 +1467,7 @@ function noteExtras(block, group, problems) {
 		}
 	}
 	if (block.banner !== undefined && group.banner === undefined) {
-		const problem = typeof block.banner === "string" && block.banner.trim() ? pictureProblem(rel(block.banner.trim()), BANNER) : "must be a JPEG file";
+		const problem = bannerProblem(block.banner);
 		if (problem) problems.push(`${label} banner: ${problem}`);
 		else group.banner = block.banner.trim();
 	}
@@ -1431,7 +1483,7 @@ function noteExtras(block, group, problems) {
 
 // news.json: newest first, [{version, date, entries: [{de, en}]}]. Several blocks may share a version.
 // A version can also be an article: title, subtitle, kind, author, banner (a local JPEG), sections. Launchers before
-// 2.2.0 read only "entries": without them the rows of the sections are taken.
+// 2.2.0 read only "entries": without them the rows of the sections are taken. The released version must have a banner.
 // Dev versions ("0.3.0-dev2") are left out unless they are the released version itself.
 function readNews(cfg, version) {
 	const file = rel(cfg.news_file);
@@ -1478,6 +1530,9 @@ function readNews(cfg, version) {
 		if (!group.entries.length) problems.push(`news ${group.version}: no entries`);
 		if (group.entries.length > NOTE.rows) problems.push(`news ${group.version}: at most ${NOTE.rows} entries`);
 	}
+	const catalog = cfg.catalog || {};
+	const general = [catalog.cover, catalog.logo, catalog.icon].concat(catalog.screenshots || []);
+	problems.push(...releasedBannerProblems(list, version, groups.find((group) => group.version === version), general));
 	return { news: groups, problems, images };
 }
 
@@ -1589,6 +1644,7 @@ function releaseNotes(cfg, manifest, test) {
 		|| manifest.news.find((group) => group.version === base) || { entries: [] };
 	const lines = [];
 	if (test) lines.push("> **Test-Release / test release** – nur zum Testen. Only for testing.", "");
+	if (news.banner) lines.push(`![${cfg.game_name} ${news.version}](${news.banner.url})`, "");
 	for (const lang of ["de", "en"]) {
 		const de = lang === "de";
 		lines.push(`## ${cfg.game_name} ${manifest.version}`, "");
@@ -1768,15 +1824,16 @@ function hideWebhook(text) {
 	return String(text).replace(/webhooks\/\d+\/[A-Za-z0-9_-]+/g, "webhooks/<hidden>");
 }
 
-// The German news and the listed pictures of a version (the exact version, else its base version: 1.2.0-test1 -> 1.2.0).
+// The German news and the pictures of a version (the exact version, else its base version: 1.2.0-test1 -> 1.2.0):
+// its banner first, then the listed ones.
 function discordNews(cfg, version) {
 	const { news, images = {} } = readNews(cfg, version);
 	const group = news.find((g) => g.version === version) || news.find((g) => g.version === version.split("-")[0]);
 	if (!group) return { entries: [], images: [] };
-	return { entries: group.entries.map((entry) => entry.de), images: images[group.version] || [] };
+	return { entries: group.entries.map((entry) => entry.de), images: [...new Set([group.banner, ...(images[group.version] || [])].filter(Boolean))] };
 }
 
-// The picture files of a post: the version's "images" from the news, else the game's cover and screenshots.
+// The picture files of a post: the version's banner and "images" from the news, else the game's cover and screenshots.
 // At most DISCORD_IMAGES, together at most DISCORD_IMAGE_BYTES; the others are left out with a note.
 function discordImages(cfg, listed) {
 	const c = cfg.catalog || {};
@@ -2205,7 +2262,7 @@ async function main() {
 
 // tools/discord/test_discord.js loads the functions without running a command.
 if (require.main === module) main().catch((error) => fail(error.message));
-else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, allowedLink, jarInfo, LAUNCHER_PAGE, NOTE };
+else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, allowedLink, jarInfo, bannerProblem, releasedBannerProblems, identity, putFile, LAUNCHER_PAGE, HUB_REPO, NOTE };
 ```
 
 ---
