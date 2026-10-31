@@ -28,35 +28,35 @@
 			"screenshots": [
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot1.jpg",
-					"sha256": "2f6b6e077ddfbbaca50346289f802d3ae89298c2901b76cee40bcb1c33f2f4bb"
+					"sha256": "603d3de638780491e54e1ad83acfde0615df12abf57ddca68901d76c970da028"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot2.jpg",
-					"sha256": "4de38480e2713ab8cba9a7c29c6d873055fea705242682c06340b782fc5227f6"
+					"sha256": "d84402ffb5ff48433b1e3c3ab8bb7fc01ef50b473276fb6a220be29982cbde4c"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot3.jpg",
-					"sha256": "279e007f365a2a4f4e08b36ac7ab795bba4ac7ba0a75f8b8c9b4108e7631e197"
+					"sha256": "0b53a991cb698d0898b6bc9abc30c398c5cc2348ce87652b2607a1b5c87c6397"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot4.jpg",
-					"sha256": "adb6fca3d729a79d286efc9ca87e0efc0edf0c02c7445cb400063dc8b9cb39c4"
+					"sha256": "2f6b6e077ddfbbaca50346289f802d3ae89298c2901b76cee40bcb1c33f2f4bb"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot5.jpg",
-					"sha256": "b71cda66168cc0e8caf5235fb1c5c37640848d761d9cfbef90534b6b8ce9b0c2"
+					"sha256": "4de38480e2713ab8cba9a7c29c6d873055fea705242682c06340b782fc5227f6"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot6.jpg",
-					"sha256": "9195e7ba2038851d6f976f3f70806e0aecbec8c2100674e714c7ed2c58393f52"
+					"sha256": "279e007f365a2a4f4e08b36ac7ab795bba4ac7ba0a75f8b8c9b4108e7631e197"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot7.jpg",
-					"sha256": "95f91140f8c007922b93c6ab9d3e84478efac801c2b2058c468e08dede4ba498"
+					"sha256": "9195e7ba2038851d6f976f3f70806e0aecbec8c2100674e714c7ed2c58393f52"
 				},
 				{
 					"url": "https://raw.githubusercontent.com/dasdimo/riftwake-releases/main/launcher/shot8.jpg",
-					"sha256": "fdfcf9d0425b4d07395a88bd1a62af92819154e9d36302ed454bd8bcd9f47b4b"
+					"sha256": "95f91140f8c007922b93c6ab9d3e84478efac801c2b2058c468e08dede4ba498"
 				}
 			],
 			"user_data_dirs": [
