@@ -1,7 +1,8 @@
 # Ein Spiel oder eine Minecraft-Mod in den DasDimo Launcher bringen
 
 **Für:** den Claude-Agenten eines Spiels oder einer Minecraft-Mod von DasDimo (GitHub-Konto `dasdimo`) – egal mit welcher Engine.
-**Version der Anleitung:** 8 (2026-10-31) · Hilfs-Skript `dasdimo_release.js` Version 7, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
+**Version der Anleitung:** 9 (2026-10-31) · Hilfs-Skript `dasdimo_release.js` Version 8, Hilfs-Datei `dasdimo_account.gd` Version 1 (Anhänge).
+**Neu in Version 9:** **Reiter und Patchnotizen wie ein Artikel** (DasDimo Launcher ab 2.2.0): Oben liegen die Reiter „Übersicht“, „Patchnotizen“, „Bilder“ und bei Mods „Anleitung“. Eine Version in `news.json` kann jetzt Titel, Untertitel, Art des Updates, Autor, ein Bild und Abschnitte mit Listen haben (Schritt 8). Das ist freiwillig, das alte Format läuft weiter. Das Logo steht jetzt klein in der Titelleiste (Schritt 6). `check` und `release` stoppen, wenn Neuigkeiten fehlerhaft oder zu lang sind. Skript aus dem Anhang übernehmen, sonst ändert sich nichts.
 **Neu in Version 7:** **DasDimo-Konto** (DasDimo Launcher ab 2.1.0): Ein Spiel kann erfahren, wer spielt, ohne eigene Anmeldung. Neues Feld `catalog.uses_account`, neuer Teil „DasDimo-Konto im Spiel“ (nach „Minecraft-Mods“). Das lohnt sich nur für Spiele mit Online-Funktionen und nur nach Rücksprache mit dem Benutzer. Alle anderen übernehmen nur das Skript aus dem Anhang.
 **Neu in Version 6:** **Neues Aussehen** (DasDimo Launcher ab 2.0.0): Das Cover füllt das ganze Fenster, das Logo steht groß über dem Knopf, die Neuigkeiten erscheinen als Karten unter dem Knopf. Die Hinweise zu `cover.jpg` und `logo.png` (Schritt 6) sind angepasst – ein Logo lohnt sich jetzt. Am Skript ändert sich nichts.
 **Neu in Version 5:** **Minecraft-Mods** (DasDimo Launcher ab 1.4.0): Eine Mod bekommt im Launcher eine eigene Seite, ein Klick legt die `.jar` in ein Minecraft-Profil, und die Seite zeigt, was man sonst noch braucht. Alles dazu im Teil „Minecraft-Mods“ (nach Schritt 13). Für Spiele ändert sich nichts – das Skript aus dem Anhang übernehmen genügt.
@@ -152,8 +153,8 @@ Lege sie unter `tools/dasdimo/art/` ab (sie gehören ins Git deines Spiels):
 | Datei | Format | Größe | Höchstens | Wofür |
 |---|---|---|---|---|
 | `icon.png` | PNG | **genau 256×256** | 300 KB | Spieleliste links (wird bis 32 px verkleinert): ein klares Motiv, kein kleiner Text, Hintergrund darf transparent sein |
-| `cover.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | 800 KB | Hintergrund der ganzen Spielseite (Launcher 2.0). **Kein Text im Bild** (Name/Logo zeichnet der Launcher). Links und unten wird es dunkel verlaufen, dort liegen Logo, Knopf und Neuigkeiten; oben ein schmaler Streifen für die Titelleiste – das Hauptmotiv in die **Mitte/rechts** |
-| `logo.png` (optional, empfohlen) | PNG, transparent | höchstens 1200×400 | 300 KB | Schriftzug statt Textnamen, groß über dem Knopf (höchstens 460×150 Pixel angezeigt). Hell auf transparentem Grund – er liegt auf dem dunklen Teil des Covers; ohne Logo steht der Name in großer Schrift da |
+| `cover.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | 800 KB | Hintergrund der ganzen Spielseite. **Kein Text im Bild** (Name/Logo zeichnet der Launcher). Links und unten wird es dunkel verlaufen: Unten links liegen Text und Knopf, unten rechts die Karten, oben die Titelleiste mit Logo und Reitern. Das Hauptmotiv gehört in die **Mitte** und nach oben. In den anderen Reitern wird das Bild abgedunkelt |
+| `logo.png` (optional, empfohlen) | PNG, transparent | höchstens 1200×400 | 300 KB | Schriftzug statt Textnamen, klein oben in der Titelleiste (höchstens 200×44 Pixel angezeigt). Muss also auch klein gut lesbar sein: ein breiter Schriftzug ohne feine Linien. Hell auf transparentem Grund; ohne Logo steht dort der Name als Text |
 | `shot1.jpg` … `shot8.jpg` | JPEG (Qualität ~85) | **genau 1920×1080** | je 800 KB | Screenshot-Reihe der Spielseite (klein, ein Klick öffnet die Großansicht mit Pfeilen). 3–5 starke Momente aus echtem Spielen, verschiedene Orte/Situationen, kein Text, keine Menüs |
 
 Herkunft: echte Szenen aus dem Spiel (Screenshot-Funktion der Engine in voller Auflösung, gute Kamera) und das vorhandene Spiel-Icon. Keine Klötzchen-Platzhalter. **Zeig die Bilder dem Benutzer** (Datei schicken) und warte auf sein OK. Externe Bilder nur mit passender Lizenz und Eintrag in den Credits deines Spiels.
@@ -196,7 +197,7 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 | `files[].kind`, `files[].name` | Format 1: `kind` immer `game` (`launcher` und `setup` gibt es nur in der Zentrale und für den Wechsel vom alten RIFTWAKE-Launcher); `name` = Dateiname ohne Pfad, beginnt mit Buchstabe/Ziffer, dann nur `A–Z a–z 0–9 . _ -`, endet auf `.exe` |
 | `files[].size`, `sha256` | Bytes (mehr als 0) und SHA-256 (64 Hex-Zeichen). Der Launcher prüft beides nach dem Download und erkennt daran, was sich geändert hat |
 | `files[].url` | voller Link zur Datei im Release (`https://github.com/dasdimo/…`). Format 2: Name im Release = die ersten 12 Zeichen der SHA-256 + Dateiname, weil GitHub keine Ordner kennt und beide Plattformen eine `Beispielspiel.exe` haben |
-| `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN |
+| `news` | die letzten 3 Versionen, neueste zuerst, jeder Eintrag DE **und** EN. Optional pro Version `title`, `subtitle`, `kind`, `author`, `banner` (`{"url", "sha256"}`) und `sections` (Schritt 8); `entries` bleibt immer drin, ältere Launcher lesen nur das |
 | `launcher_version` | bei Spielen immer `""` |
 | `min_launcher` | optional: die älteste DasDimo-Launcher-Version, mit der diese Spielversion installiert und gespielt werden darf, z. B. `"1.1.0"` (wie `version`, ohne `v`). Ist der Launcher älter, sperrt er „Aktualisieren“ und „Spielen“ (auch die installierte Version) und zeigt „Launcher aktualisieren“; ohne Internet bleibt die installierte Version spielbar. Gilt ab Launcher 1.1.1, ältere ignorieren das Feld. Nur setzen, wenn das Spiel wirklich einen neueren Launcher braucht. Das Hilfs-Skript schreibt es bei Spielen nicht – bei Bedarf beim Benutzer melden (bei Mods immer `1.4.0`) |
 
@@ -212,6 +213,41 @@ Format 1 (eine exe) hat kein `exe`, und jede Zeile in `files` sieht so aus: `{"k
 ]
 ```
 Schreib die Einträge für Freunde, nicht für Programmierer (kurz, was man im Spiel merkt). Hat dein Projekt schon ein Änderungsprotokoll, übernimm daraus – oder lass dir vom Benutzer sagen, was drinstehen soll.
+
+**Patchnotizen als Artikel (freiwillig, ab Launcher 2.2.0):** Im Reiter „Patchnotizen“ steht jede Version als Artikel mit Bild, großem Titel und Abschnitten. Ohne die neuen Felder erzeugt der Launcher einen Titel aus Spielname und Version und zeigt `entries` als einfache Liste. Mit ihnen sieht eine Version so aus:
+```json
+[
+	{
+		"version": "0.3.0",
+		"date": "2026-12-01",
+		"title": {"de": "Das Hafen-Update", "en": "The harbour update"},
+		"subtitle": {"de": "Neue Karte und ruhigere Runden", "en": "New map and calmer rounds"},
+		"kind": {"de": "Großes Update", "en": "Major update"},
+		"author": "DasDimo",
+		"banner": "tools/dasdimo/news_images/0.3.0-banner.jpg",
+		"sections": [
+			{"title": {"de": "Neue Karten", "en": "New maps"}, "items": [
+				{"de": "Hafen", "en": "Harbour", "items": [
+					{"de": "Zwei Ebenen mit Kränen", "en": "Two levels with cranes"}
+				]}
+			]},
+			{"title": {"de": "Fehlerbehebungen", "en": "Bug fixes"}, "items": [
+				{"de": "Der Ton bricht nicht mehr ab.", "en": "Sound no longer cuts out."}
+			]}
+		]
+	}
+]
+```
+| Feld | Regel |
+|---|---|
+| `title`, `kind` | DE **und** EN, je höchstens 120 Zeichen. `kind` ist die Art des Updates in der Zeile unter dem Titel, Standard „Spielaktualisierung“ oder „Mod-Aktualisierung“ |
+| `subtitle` | DE **und** EN, höchstens 500 Zeichen |
+| `author` | ein Name, höchstens 60 Zeichen, Standard `DasDimo` |
+| `banner` | Pfad im Repo deines Spiels, JPEG, höchstens 1920×1080 und 800 KB. Am besten breit (etwa 3:1), die Mitte bleibt immer sichtbar. `release` lädt es vor dem Manifest nach `launcher/patch-<version>.jpg`, im Manifest steht dann Adresse + SHA-256. Keine persönlichen Daten im Bild |
+| `sections` | höchstens 16 Abschnitte, Titel optional. Eine Zeile (DE **und** EN, höchstens 500 Zeichen) kann unter `items` eine eigene Liste haben, insgesamt höchstens 3 Ebenen und 300 Zeilen pro Version |
+| `entries` | darf bei einem Artikel fehlen: Das Skript füllt sie aus den obersten Zeilen der Abschnitte, damit ältere Launcher und der Discord-Beitrag etwas zu zeigen haben |
+
+Mehrere Blöcke mit gleicher Version: `entries` werden zusammengefasst, bei den neuen Feldern gilt der erste Block. Alles ist nur Text, Formatierungen wie `[b]` oder `**` zeigt der Launcher wörtlich.
 
 Optional pro Version: **Bilder für den Discord-Beitrag**, z. B. `"images": ["tools/dasdimo/news_images/0.2.0-wirtin.jpg"]` (Pfade im Repo deines Spiels, `.jpg`/`.png`/`.webp`/`.gif`, höchstens 4 pro Version, zusammen höchstens 8 MB). Sie gehen nur nach Discord, nicht ins Manifest und nicht in den Launcher. Ohne `images` zeigt der Beitrag das Cover und die ersten 3 Screenshots aus `catalog`. Auf den Bildern dürfen keine persönlichen Daten stehen (z. B. Ordner mit dem Windows-Namen des Benutzers).
 
@@ -303,7 +339,7 @@ Der Probelauf zeigt den Eintrag. Der echte Lauf lädt `icon.png`/`cover.jpg`/`lo
 Ab **DasDimo Launcher 1.4.0** stehen auch die Minecraft-Mods des Benutzers im Launcher: links unter „Mods“, mit eigener Seite. Die Schritte 1–13 gelten auch für eine Mod – mit den Unterschieden in diesem Teil. Am Launcher änderst du nichts, alles kommt aus deiner Konfiguration.
 
 **So sieht es im Launcher aus:**
-- **Mod-Seite:** Cover als Hintergrund, Logo oder Name mit dem Abzeichen „Mod“, Untertitel, Chips (Minecraft-Version, Loader + Mindestversion, Java, Client/Server), ein Knopf, darunter „Was du brauchst“, die „Anleitung“ (aufklappbare Abschnitte: Erste Schritte, Befehle …), die Neuigkeiten als Karten und die Screenshots.
+- **Mod-Seite:** Cover als Hintergrund, oben Logo oder Name und die Reiter. „Übersicht“: Abzeichen „Mod“, Untertitel, Chips (Minecraft-Version, Loader + Mindestversion, Java, Client/Server), ein Knopf, die neueste Patchnotiz und zwei Bilder als Karten. Bei Hinweisen aus `important` steht dort eine klickbare Zeile. „Anleitung“: Wichtiges, „Was du brauchst“ und die aufklappbaren Abschnitte (Erste Schritte, Befehle …). Dazu die Reiter „Patchnotizen“ und „Bilder“.
 - **Installieren:** Beim ersten Klick fragt der Launcher „Wohin installieren?“. Er findet die Profile auf dem PC (Minecraft Launcher, Modrinth App, NoRisk, CurseForge, Prism) – passende (gleiche Minecraft-Version und gleicher Loader) stehen oben. Oder ein Ordner von Hand, oder „Nur Datei herunterladen …“ (die geprüfte `.jar` irgendwohin speichern). Die Wahl merkt er sich pro Mod.
 - **Alte Datei derselben Mod** im Mods-Ordner (gleiche `id` in `fabric.mod.json`, z. B. eine von Hand kopierte ältere Version): Der Launcher fragt und benennt sie in `.jar.disabled` um. Fremde Dateien löscht er nie; „Entfernen …“ löscht nur seine eigene `.jar`, und nur wenn die SHA-256 passt.
 - **Updates** prüft er wie bei Spielen (beim Start und alle 30 Minuten). Ein Update ersetzt nur seine eigene Datei im gewählten Profil.
@@ -573,7 +609,7 @@ Schritt 11 reicht nicht, denn dafür muss jemand angemeldet sein. Bitte den Benu
 Unverändert kopieren. Bei einer neuen Version dieser Anleitung das Skript aus der neuen Anleitung übernehmen (die Version steht in der ersten Zeile).
 
 ```js
-// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 7, from INTEGRATION.md).
+// DasDimo Launcher - release helper for one game or Minecraft mod (helper version 8, from INTEGRATION.md).
 // Reads tools/dasdimo/dasdimo.json (or --config <file>). Needs Node 18+ and the GitHub CLI (account dasdimo).
 //   node tools/dasdimo/dasdimo_release.js check                      config, builds, news, pictures
 //   node tools/dasdimo/dasdimo_release.js diff [--against <file>]    what players load compared to the latest release
@@ -596,11 +632,13 @@ const crypto = require("crypto");
 const zlib = require("zlib");
 const { spawnSync } = require("child_process");
 
-const HELPER_VERSION = 7;
+const HELPER_VERSION = 8;
 const OWNER = "dasdimo";
 const HUB_REPO = "dasdimo/dasdimo-launcher-releases";
 const CATALOG_FILE = "games.json";
 const NEWS_VERSIONS = 3;
+// What the launcher keeps of one version in the news (core/patch_note.gd).
+const NOTE = { sections: 16, rows: 300, depth: 3, title: 120, text: 500, word: 60 };
 const ARCHES = ["x86_64", "arm64"];
 const STATUSES = ["testing", "released", "hidden"];
 const VERSION_RE = /^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$/;
@@ -628,6 +666,8 @@ const PICTURES = {
 // Pictures of the demo page (catalog.screenshots), shown in this order.
 const SCREENSHOT = { type: "jpg", width: 1920, height: 1080, maxKb: 800 };
 const MAX_SCREENSHOTS = 8;
+// The picture on top of a patch note.
+const BANNER = { type: "jpg", maxWidth: 1920, maxHeight: 1080, maxKb: 800 };
 const LAUNCHER_PAGE = `https://github.com/${HUB_REPO}`;
 // Discord: one forum post per version through the forum's webhook. The webhook addresses are secret and live only
 // on the user's PC (%APPDATA%\DasDimo\discord.json, set up by the user) - never in git, a repo or a chat.
@@ -1307,7 +1347,90 @@ function pictureProblem(file, rule) {
 
 // ---------- news ----------
 
+// {de, en} with text on both sides, else a problem.
+function notePair(value, limit, label, problems) {
+	if (!value || typeof value.de !== "string" || typeof value.en !== "string" || !value.de.trim() || !value.en.trim()) {
+		problems.push(`${label}: needs de + en`);
+		return undefined;
+	}
+	const pair = { de: value.de.trim(), en: value.en.trim() };
+	if (pair.de.length > limit || pair.en.length > limit) problems.push(`${label}: at most ${limit} characters`);
+	return pair;
+}
+
+// A row can hold a list of its own; `depth` is the level of these rows.
+function noteRows(list, depth, label, problems, count) {
+	const rows = [];
+	for (const item of list) {
+		const row = notePair(item, NOTE.text, label + " row", problems);
+		if (!row) continue;
+		count.rows++;
+		if (item.items !== undefined) {
+			if (!Array.isArray(item.items)) {
+				problems.push(`${label}: items must be a list`);
+			} else if (depth >= NOTE.depth) {
+				problems.push(`${label}: lists go at most ${NOTE.depth} levels deep`);
+			} else {
+				const children = noteRows(item.items, depth + 1, label, problems, count);
+				if (children.length) row.items = children;
+			}
+		}
+		rows.push(row);
+	}
+	return rows;
+}
+
+function noteSections(list, label, problems) {
+	if (list.length > NOTE.sections) problems.push(`${label}: at most ${NOTE.sections} sections`);
+	const count = { rows: 0 };
+	const sections = [];
+	for (const section of list) {
+		if (!section || !Array.isArray(section.items)) {
+			problems.push(`${label}: every section needs items`);
+			continue;
+		}
+		const items = noteRows(section.items, 1, label, problems, count);
+		if (!items.length) continue;
+		const title = section.title === undefined ? undefined : notePair(section.title, NOTE.title, label + " section title", problems);
+		sections.push(title ? { title, items } : { items });
+	}
+	if (count.rows > NOTE.rows) problems.push(`${label}: at most ${NOTE.rows} rows`);
+	return sections;
+}
+
+// What makes a version an article. Several blocks of one version: the first one decides.
+function noteExtras(block, group, problems) {
+	const label = "news " + block.version;
+	for (const key of ["title", "subtitle", "kind"]) {
+		if (block[key] === undefined || group[key] !== undefined) continue;
+		const pair = notePair(block[key], key === "subtitle" ? NOTE.text : NOTE.title, `${label} ${key}`, problems);
+		if (pair) group[key] = pair;
+	}
+	if (block.author !== undefined && group.author === undefined) {
+		if (typeof block.author !== "string" || !block.author.trim() || block.author.trim().length > NOTE.word) {
+			problems.push(`${label} author: a name of at most ${NOTE.word} characters`);
+		} else {
+			group.author = block.author.trim();
+		}
+	}
+	if (block.banner !== undefined && group.banner === undefined) {
+		const problem = typeof block.banner === "string" && block.banner.trim() ? pictureProblem(rel(block.banner.trim()), BANNER) : "must be a JPEG file";
+		if (problem) problems.push(`${label} banner: ${problem}`);
+		else group.banner = block.banner.trim();
+	}
+	if (block.sections !== undefined && !Array.isArray(block.sections)) {
+		problems.push(`${label}: sections must be a list`);
+	} else if (block.sections !== undefined && group.sections === undefined) {
+		const sections = noteSections(block.sections, label, problems);
+		if (sections.length) group.sections = sections;
+	} else if (block.sections !== undefined) {
+		problems.push(`${label}: only one block of a version can have sections`);
+	}
+}
+
 // news.json: newest first, [{version, date, entries: [{de, en}]}]. Several blocks may share a version.
+// A version can also be an article: title, subtitle, kind, author, banner (a local JPEG), sections. Launchers before
+// 2.2.0 read only "entries": without them the rows of the sections are taken.
 // Dev versions ("0.3.0-dev2") are left out unless they are the released version itself.
 function readNews(cfg, version) {
 	const file = rel(cfg.news_file);
@@ -1325,7 +1448,7 @@ function readNews(cfg, version) {
 	const groups = [];
 	const images = {};
 	for (const block of list) {
-		if (!block || !VERSION_RE.test(block.version || "") || !Array.isArray(block.entries)) {
+		if (!block || !VERSION_RE.test(block.version || "") || (!Array.isArray(block.entries) && !Array.isArray(block.sections))) {
 			problems.push("news block without valid version/entries");
 			continue;
 		}
@@ -1337,12 +1460,12 @@ function readNews(cfg, version) {
 			groups.push(group);
 		}
 		if ((block.date || "") > group.date) group.date = block.date;
-		for (const entry of block.entries) {
-			if (!entry || typeof entry.de !== "string" || typeof entry.en !== "string" || !entry.de.trim() || !entry.en.trim()) {
-				problems.push(`news ${block.version}: every entry needs de + en`);
-				continue;
-			}
-			group.entries.push({ de: entry.de.trim(), en: entry.en.trim() });
+		const hadSections = group.sections !== undefined;
+		noteExtras(block, group, problems);
+		const rows = Array.isArray(block.entries) ? block.entries : (!hadSections && group.sections ? group.sections.flatMap((section) => section.items) : []);
+		for (const entry of rows) {
+			const row = notePair(entry, NOTE.text, `news ${block.version} entry`, problems);
+			if (row) group.entries.push(row);
 		}
 		// Pictures for the Discord post only, never in the manifest.
 		if (block.images !== undefined && !Array.isArray(block.images)) problems.push(`news ${block.version}: images must be a list of picture files`);
@@ -1350,13 +1473,17 @@ function readNews(cfg, version) {
 			if (typeof file === "string" && file.trim()) (images[block.version] = images[block.version] || []).push(file.trim());
 		}
 	}
+	for (const group of groups) {
+		if (!group.entries.length) problems.push(`news ${group.version}: no entries`);
+		if (group.entries.length > NOTE.rows) problems.push(`news ${group.version}: at most ${NOTE.rows} entries`);
+	}
 	return { news: groups, problems, images };
 }
 
 // ---------- manifest ----------
 
 // Hashes the builds and makes the manifest (nothing written). assets = the release files [{name, full, size, sha256}].
-function makeRelease(cfg, suffix) {
+function makeRelease(cfg, suffix, branch = "main") {
 	const baseVersion = readVersion(cfg);
 	const version = suffix ? `${baseVersion}-${suffix}` : baseVersion;
 	if (!VERSION_RE.test(version)) fail(`invalid version '${version}'`);
@@ -1406,8 +1533,17 @@ function makeRelease(cfg, suffix) {
 	if (mod) Object.assign(manifest, { min_launcher: MOD_MIN_LAUNCHER }, modPage(cfg));
 	else if (format === 2) manifest.exe = builds[0].exe;
 	manifest.files = files;
-	manifest.news = readNews(cfg, version).news;
-	return Object.assign(result, { manifest, assets: [...assets.values()] });
+	const news = readNews(cfg, version);
+	problems.push(...news.problems);
+	// A banner is a local file in news.json; the manifest says where the launcher finds it.
+	const banners = [];
+	manifest.news = news.news.map((group) => {
+		if (!group.banner) return group;
+		const remote = `launcher/patch-${group.version}.jpg`;
+		banners.push({ file: group.banner, remote });
+		return { ...group, banner: { url: `https://raw.githubusercontent.com/${cfg.repo}/${branch}/${remote}`, sha256: hash(rel(group.banner)) } };
+	});
+	return Object.assign(result, { manifest, assets: [...assets.values()], banners });
 }
 
 function printSummary(release) {
@@ -1430,8 +1566,8 @@ function printSummary(release) {
 	}
 }
 
-function buildRelease(cfg, suffix) {
-	const release = makeRelease(cfg, suffix);
+function buildRelease(cfg, suffix, branch) {
+	const release = makeRelease(cfg, suffix, branch);
 	if (release.problems.length) fail(release.problems.join("; "));
 	const out = rel(path.join(cfg.out_dir, release.tag));
 	fs.mkdirSync(out, { recursive: true });
@@ -1546,6 +1682,11 @@ function putFile(repo, filePath, bytes, message, who) {
 		fs.rmSync(tmp, { force: true });
 	}
 	console.log(`uploaded: ${repo}/${filePath}`);
+}
+
+function defaultBranch(cfg) {
+	const info = gh(["api", `repos/${cfg.repo}`, "--jq", ".default_branch"], { allowFail: true });
+	return info.ok && info.out.trim() ? info.out.trim() : "main";
 }
 
 function releaseAssets(repo, tag) {
@@ -1799,7 +1940,7 @@ function commandCheck(cfg) {
 		if (release.manifest && release.format === 2 && !release.mod) console.log(`${release.assets.length} release file(s), same files of both builds only once`);
 		problems.push(...release.problems);
 		const news = readNews(cfg, baseVersion);
-		problems.push(...news.problems);
+		problems.push(...news.problems.filter((problem) => !problems.includes(problem)));
 		if (!news.news.some((group) => group.version === baseVersion)) problems.push(`news: no entry for ${baseVersion} yet (${cfg.news_file})`);
 		problems.push(...discordImages(cfg, discordNews(cfg, baseVersion).images).problems.map((problem) => "discord: " + problem));
 	}
@@ -1863,13 +2004,15 @@ async function commandRelease(cfg, args) {
 	const repoInfo = gh(["repo", "view", cfg.repo, "--json", "visibility"], { allowFail: true });
 	if (!repoInfo.ok) fail(`${cfg.repo} does not exist yet (INTEGRATION.md step 3)`);
 	if (JSON.parse(repoInfo.out).visibility !== "PUBLIC") fail(`${cfg.repo} must be public`);
-	const release = buildRelease(cfg, args.suffix);
+	const release = buildRelease(cfg, args.suffix, defaultBranch(cfg));
 	// A release needs at least one commit in the repo: the README is the first one.
 	if (args.readme || !getFile(cfg.repo, "README.md")) {
 		const readme = rel(cfg.readme_file);
 		if (!fs.existsSync(readme)) fail("README missing: " + cfg.readme_file);
 		putFile(cfg.repo, "README.md", fs.readFileSync(readme), "Download-Anleitung aktualisiert", who);
 	}
+	// Before the manifest: the launcher never sees a banner that is not there yet.
+	for (const banner of release.banners) putFile(cfg.repo, banner.remote, fs.readFileSync(rel(banner.file)), "Launcher-Bild: Patchnotiz", who);
 	const title = `${cfg.game_name} ${release.version}` + (args.suffix ? " (Test)" : "");
 	const uploads = stageAssets(release);
 	let existing = releaseAssets(cfg.repo, release.tag);
@@ -1918,8 +2061,7 @@ function commandRegister(cfg, args) {
 		if (!args.dryRun) fail(`${cfg.repo} has no release yet - run "release" first`);
 		console.log(`note: ${cfg.repo} has no release yet`);
 	}
-	const branchInfo = gh(["api", `repos/${cfg.repo}`, "--jq", ".default_branch"], { allowFail: true });
-	const branch = branchInfo.ok && branchInfo.out.trim() ? branchInfo.out.trim() : "main";
+	const branch = defaultBranch(cfg);
 	const c = cfg.catalog;
 	const entry = {
 		id: cfg.game_id,
@@ -2062,7 +2204,7 @@ async function main() {
 
 // tools/discord/test_discord.js loads the functions without running a command.
 if (require.main === module) main().catch((error) => fail(error.message));
-else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, allowedLink, jarInfo, LAUNCHER_PAGE };
+else module.exports = { discordMessages, discordNews, discordImages, postDiscord, hideWebhook, allowedLink, jarInfo, LAUNCHER_PAGE, NOTE };
 ```
 
 ---
